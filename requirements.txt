@@ -1,0 +1,20 @@
+# ──────────────────────────────────────────────────────────
+# Menstrual Health AI/ML Pipeline — Python Dependencies
+# ──────────────────────────────────────────────────────────
+# Install with:
+#   pip install -r requirements.txt
+
+# Core ML & data science
+numpy>=1.24.0
+pandas>=2.0.0
+scikit-learn>=1.3.0
+joblib>=1.3.0
+
+# API server (for Flutter integration)
+flask>=3.0.0
+flask-cors>=4.0.0
+
+# Optional: data exploration / debugging
+# jupyter
+# matplotlib
+# seaborn
