@@ -182,6 +182,8 @@ class _AIInsightsScreenState extends State<AIInsightsScreen>
                         // Fertility Card
                         _FertilityInsightCard(cycle: cycle),
                         const SizedBox(height: AppSpacing.md),
+                        _PcodSupportCard(cycle: cycle),
+                        const SizedBox(height: AppSpacing.md),
                         // Cycle Prediction
                         _buildInsightCard(
                           index: 0,
@@ -353,6 +355,33 @@ class _AIInsightsScreenState extends State<AIInsightsScreen>
         'Consistent tracking helps improve future accuracy',
       ];
     }
+  }
+}
+
+class _PcodSupportCard extends StatelessWidget {
+  const _PcodSupportCard({required this.cycle});
+
+  final CycleProvider cycle;
+
+  @override
+  Widget build(BuildContext context) {
+    final tracked = cycle.trackedPcodSymptoms;
+    final value = tracked.isEmpty
+        ? (cycle.predictedCycleLength > 35 ? 'Long cycle watch' : 'Prevention tips')
+        : '${tracked.length} signs logged';
+
+    final subtitle = tracked.isEmpty
+        ? 'Track changes early to spot PCOD-related patterns'
+        : 'Based on symptoms you tracked in the Cycle tab';
+
+    return _InsightCard(
+      title: 'PCOD Support',
+      value: value,
+      subtitle: subtitle,
+      emoji: '🩺',
+      gradient: const [Color(0xFFEF6C00), Color(0xFFFFA726)],
+      tips: cycle.pcodSupportTips,
+    );
   }
 }
 

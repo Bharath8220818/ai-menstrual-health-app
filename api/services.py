@@ -75,6 +75,28 @@ def _food_recommendations_from_symptoms(symptoms: List[str]) -> List[str]:
         recs.extend(["Fennel", "Peppermint Tea", "Asparagus"])
     if any("fatigue" in s or "tired" in s for s in s_lower):
         recs.extend(["Spinach", "Oats", "Almonds"])
+    if any(
+        keyword in s
+        for s in s_lower
+        for keyword in (
+            "pcod",
+            "pcos",
+            "irregular cycle",
+            "acne",
+            "weight gain",
+            "facial hair",
+            "hair thinning",
+            "dark neck",
+            "sugar craving",
+        )
+    ):
+        recs.extend([
+            "Eggs",
+            "Greek Yogurt",
+            "Lentils",
+            "Leafy Greens",
+            "Nuts and Seeds",
+        ])
     if not recs:
         recs = ["Banana", "Spinach"]
     # de-duplicate while preserving order
@@ -97,6 +119,34 @@ def _health_tips_from_context(stress: Optional[str], sleep_hours: Optional[float
     if not tips:
         tips.append("Maintain a balanced diet, regular exercise, and hydration")
     return tips
+
+
+def _pcod_tips_from_symptoms(symptoms: List[str]) -> List[str]:
+    s_lower = [s.lower() for s in (symptoms or [])]
+    has_pcod_pattern = any(
+        keyword in symptom
+        for symptom in s_lower
+        for keyword in (
+            "pcod",
+            "pcos",
+            "irregular cycle",
+            "acne",
+            "weight gain",
+            "facial hair",
+            "hair thinning",
+            "dark neck",
+            "pelvic pain",
+        )
+    )
+    if not has_pcod_pattern:
+        return []
+
+    return [
+        "Possible PCOD-related symptoms logged: track cycle length, acne, hair changes, and weight shifts every month",
+        "Exercise most days with a mix of walking, strength training, or yoga to support insulin sensitivity",
+        "Choose high-fiber, high-protein meals and reduce sugary drinks or refined snacks",
+        "Discuss persistent irregular periods, severe pain, or very heavy bleeding with a gynecologist",
+    ]
 
 
 def recommend(data: Dict[str, Any]) -> Dict[str, Any]:
@@ -128,6 +178,8 @@ def recommend(data: Dict[str, Any]) -> Dict[str, Any]:
             stress=data.get("stress_level"),
             sleep_hours=data.get("sleep_hours"),
         )
+        tips.extend(_pcod_tips_from_symptoms(data.get("symptoms", [])))
+        tips = list(dict.fromkeys(tips))
 
         return {
             "cycle_length": cycle_length,

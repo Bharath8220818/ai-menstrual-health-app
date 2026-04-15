@@ -30,10 +30,11 @@ class AppRoutes {
   static const String home = '/home';
 
   // Tab index shortcuts
-  // Index: 0=Home 1=Cycle 2=Pregnancy 3=AI 4=Profile
+  // Index: 0=Home 1=Cycle 2=Pregnancy 3=PCOD 4=AI 5=Profile
   static const String dashboard = '/dashboard';
   static const String cycleTracker = '/cycle-tracker';
   static const String pregnancy = '/pregnancy';
+  static const String pcod = '/pcod';
   static const String aiInsights = '/ai-insights';
   static const String chatbot = '/chatbot';
   static const String profile = '/profile';
@@ -77,12 +78,14 @@ class AppRoutes {
         page = const HomeShellScreen(initialIndex: 1);
       case pregnancy:
         page = const HomeShellScreen(initialIndex: 2);
+      case pcod:
+        page = const HomeShellScreen(initialIndex: 3);
       case aiInsights:
-        page = const HomeShellScreen(initialIndex: 3);
-      case chatbot:
-        page = const HomeShellScreen(initialIndex: 3);
-      case profile:
         page = const HomeShellScreen(initialIndex: 4);
+      case chatbot:
+        page = const HomeShellScreen(initialIndex: 4);
+      case profile:
+        page = const HomeShellScreen(initialIndex: 5);
       case notifications:
         page = const NotificationScreen();
       case waterTracker:
@@ -114,9 +117,9 @@ class AppRoutes {
   }
 
   static int _extractTabIndex(Object? arguments) {
-    if (arguments is int) return arguments.clamp(0, 4);
+    if (arguments is int) return arguments.clamp(0, 5);
     if (arguments is Map<String, Object?> && arguments['tab'] is int) {
-      return (arguments['tab']! as int).clamp(0, 4);
+      return (arguments['tab']! as int).clamp(0, 5);
     }
     return 0;
   }

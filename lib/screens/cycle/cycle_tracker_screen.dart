@@ -32,6 +32,29 @@ class CycleTrackerScreenState extends State<CycleTrackerScreen>
     'Bloating',
     'Nausea',
     'Spotting',
+    'Irregular cycle',
+    'Heavy bleeding',
+    'Pelvic pain',
+    'Chronic pelvic pain',
+    'Acne flare-ups',
+    'Weight gain',
+    'Sudden weight changes',
+    'Extreme weight loss',
+    'Facial hair growth',
+    'Hair thinning',
+    'Hair loss',
+    'Dark neck/underarm patches',
+    'Sugar cravings',
+    'Difficulty sleeping',
+    'Pain during intercourse',
+    'Frequent urination',
+    'No periods for 3+ months',
+    'Stress',
+    'Fever',
+    'Unusual discharge',
+    'Lower abdominal pain',
+    'Irregular bleeding',
+    'Infertility',
   ];
 
   final List<String> _flowLevels = const [
@@ -62,7 +85,7 @@ class CycleTrackerScreenState extends State<CycleTrackerScreen>
   Future<void> _openAddCycleSheet() async {
     DateTime? startDate;
     DateTime? endDate;
-    String symptom = _symptoms.first;
+    final Set<String> selectedSymptoms = <String>{};
     String flowLevel = _flowLevels[1];
 
     final startController = TextEditingController();
@@ -186,13 +209,21 @@ class CycleTrackerScreenState extends State<CycleTrackerScreen>
                       const SizedBox(height: AppSpacing.md),
                       // Symptoms
                       Text(
-                        'Symptoms',
+                        'Symptoms & PCOD Signs',
                         style: Theme.of(context)
                             .textTheme
                             .titleSmall
                             ?.copyWith(fontWeight: FontWeight.w700),
                       ),
                       const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        'Track cramps, mood changes, and possible PCOD signs like acne, weight gain, hair changes, or irregular cycles.',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: AppColors.textMuted,
+                              height: 1.4,
+                            ),
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
                       Wrap(
                         spacing: 8,
                         runSpacing: 8,
@@ -200,9 +231,14 @@ class CycleTrackerScreenState extends State<CycleTrackerScreen>
                             .map(
                               (s) => FilterChip(
                                 label: Text(s),
-                                selected: symptom == s,
-                                onSelected: (_) =>
-                                    setModalState(() => symptom = s),
+                                selected: selectedSymptoms.contains(s),
+                                onSelected: (selected) => setModalState(() {
+                                  if (selected) {
+                                    selectedSymptoms.add(s);
+                                  } else {
+                                    selectedSymptoms.remove(s);
+                                  }
+                                }),
                                 selectedColor: AppColors.accent,
                                 checkmarkColor: AppColors.primary,
                               ),
@@ -290,7 +326,8 @@ class CycleTrackerScreenState extends State<CycleTrackerScreen>
                                 CycleEntry(
                                   startDate: startDate!,
                                   endDate: endDate!,
-                                  symptom: '$symptom ($flowLevel flow)',
+                                  symptom:
+                                      '${selectedSymptoms.isEmpty ? 'No symptoms noted' : selectedSymptoms.join(', ')} • $flowLevel flow',
                                 ),
                               );
                           Navigator.pop(context);
@@ -465,6 +502,10 @@ class CycleTrackerScreenState extends State<CycleTrackerScreen>
                   const SizedBox(height: AppSpacing.md),
                   // Cycle stats
                   _CycleStats(cycle: cycle),
+                  const SizedBox(height: AppSpacing.md),
+                  _PcodSupportBanner(cycle: cycle),
+                  const SizedBox(height: AppSpacing.md),
+                  _PcodGuideCard(cycle: cycle),
                   const SizedBox(height: AppSpacing.md),
                   // History
                   const Text(
@@ -663,6 +704,234 @@ class _CycleStats extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _PcodSupportBanner extends StatelessWidget {
+  const _PcodSupportBanner({required this.cycle});
+
+  final CycleProvider cycle;
+
+  @override
+  Widget build(BuildContext context) {
+    final symptoms = cycle.trackedPcodSymptoms;
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF7F1),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        border: Border.all(color: const Color(0xFFF6C9A9)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFE2CC),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Icon(
+                  Icons.monitor_heart_rounded,
+                  color: Color(0xFFC55A11),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  symptoms.isEmpty
+                      ? 'PCOD watch enabled from your cycle pattern'
+                      : 'Possible PCOD-related signs tracked',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textDark,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (symptoms.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Text(
+              symptoms.join(', '),
+              style: const TextStyle(
+                color: AppColors.textMuted,
+                height: 1.4,
+              ),
+            ),
+          ],
+          const SizedBox(height: 12),
+          const Text(
+            'Open AI Insights for food, self-care, and when-to-see-a-doctor guidance.',
+            style: TextStyle(
+              color: AppColors.textDark,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PcodGuideCard extends StatelessWidget {
+  const _PcodGuideCard({required this.cycle});
+
+  final CycleProvider cycle;
+
+  @override
+  Widget build(BuildContext context) {
+    final tracked = cycle.trackedPcodSymptoms;
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFEF6C00).withValues(alpha: 0.08),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'PCOD Care Guide',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              color: AppColors.textDark,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            tracked.isEmpty
+                ? 'This guide stays visible even before symptoms are logged, so users can learn what to track and how to manage PCOD-related concerns.'
+                : 'Based on tracked signs like ${tracked.take(4).join(', ')}.',
+            style: const TextStyle(
+              color: AppColors.textMuted,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 14),
+          const Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: _GuideTile(
+                  icon: Icons.check_circle_outline_rounded,
+                  title: 'What To Do',
+                  items: [
+                    'Move 30 min most days',
+                    'Sleep 7-9 hours',
+                    'Track symptoms monthly',
+                  ],
+                ),
+              ),
+              SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: _GuideTile(
+                  icon: Icons.restaurant_menu_rounded,
+                  title: 'What To Eat',
+                  items: [
+                    'Eggs, dal, yogurt, tofu',
+                    'Oats, beans, leafy greens',
+                    'Nuts, seeds, low-GI carbs',
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          const _GuideTile(
+            icon: Icons.health_and_safety_outlined,
+            title: 'Other Problems To Watch',
+            items: [
+              'Acne and scalp hair thinning',
+              'Facial hair growth or dark skin patches',
+              'Heavy bleeding, pelvic pain, cravings, or missed periods',
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GuideTile extends StatelessWidget {
+  const _GuideTile({
+    required this.icon,
+    required this.title,
+    required this.items,
+  });
+
+  final IconData icon;
+  final String title;
+  final List<String> items;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.background,
+        borderRadius: BorderRadius.circular(AppSpacing.radius),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 18, color: const Color(0xFFEF6C00)),
+              const SizedBox(width: 6),
+              Text(
+                title,
+                style: const TextStyle(
+                  color: AppColors.textDark,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          ...items.map(
+            (item) => Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '• ',
+                    style: TextStyle(
+                      color: Color(0xFFEF6C00),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      item,
+                      style: const TextStyle(
+                        color: AppColors.textMuted,
+                        fontSize: 12,
+                        height: 1.35,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
