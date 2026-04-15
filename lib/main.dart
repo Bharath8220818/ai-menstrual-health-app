@@ -6,6 +6,7 @@ import 'package:femi_friendly/core/theme/app_theme.dart';
 import 'package:femi_friendly/providers/auth_provider.dart';
 import 'package:femi_friendly/providers/chat_provider.dart';
 import 'package:femi_friendly/providers/cycle_provider.dart';
+import 'package:femi_friendly/providers/hormonal_condition_provider.dart';
 import 'package:femi_friendly/providers/pregnancy_provider.dart';
 import 'package:femi_friendly/routes/routes.dart';
 
@@ -23,6 +24,9 @@ class FemiFriendlyApp extends StatelessWidget {
         ChangeNotifierProvider<AuthProvider>(create: (_) => AuthProvider()),
         ChangeNotifierProvider<CycleProvider>(create: (_) => CycleProvider()),
         ChangeNotifierProvider<ChatProvider>(create: (_) => ChatProvider()),
+        ChangeNotifierProvider<HormonalConditionProvider>(
+          create: (_) => HormonalConditionProvider(),
+        ),
         ChangeNotifierProvider<PregnancyProvider>(
           create: (_) => PregnancyProvider(),
         ),

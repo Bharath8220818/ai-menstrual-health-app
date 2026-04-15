@@ -7,6 +7,7 @@ import 'package:femi_friendly/screens/chat/chatbot_screen.dart';
 import 'package:femi_friendly/screens/cycle/cycle_tracker_screen.dart';
 import 'package:femi_friendly/screens/dashboard/dashboard_screen.dart';
 import 'package:femi_friendly/screens/insights/ai_insights_screen.dart';
+import 'package:femi_friendly/screens/pcod/hormonal_conditions_screen.dart';
 import 'package:femi_friendly/screens/pregnancy/pregnancy_screen.dart';
 import 'package:femi_friendly/screens/profile/profile_screen.dart';
 
@@ -76,39 +77,46 @@ class _HomeShellScreenState extends State<HomeShellScreen>
     _cycleScreenKey.currentState?.openAddCycleSheet();
   }
 
-  // 5 tabs: Home | Cycle | Pregnancy | AI | Profile
-  static const _tabs = <({IconData icon, IconData activeIcon, String label, String emoji})>[
-    (
-      icon: Icons.home_outlined,
-      activeIcon: Icons.home_rounded,
-      label: 'Home',
-      emoji: '🏠',
-    ),
-    (
-      icon: Icons.calendar_month_outlined,
-      activeIcon: Icons.calendar_month_rounded,
-      label: 'Cycle',
-      emoji: '🩸',
-    ),
-    (
-      icon: Icons.favorite_border_rounded,
-      activeIcon: Icons.favorite_rounded,
-      label: 'Pregnancy',
-      emoji: '🤰',
-    ),
-    (
-      icon: Icons.psychology_outlined,
-      activeIcon: Icons.psychology_rounded,
-      label: 'AI',
-      emoji: '🤖',
-    ),
-    (
-      icon: Icons.person_outline_rounded,
-      activeIcon: Icons.person_rounded,
-      label: 'Profile',
-      emoji: '👤',
-    ),
-  ];
+  // 6 tabs: Home | Cycle | Pregnancy | PCOD | AI | Profile
+  static const _tabs =
+      <({IconData icon, IconData activeIcon, String label, String emoji})>[
+        (
+          icon: Icons.home_outlined,
+          activeIcon: Icons.home_rounded,
+          label: 'Home',
+          emoji: 'HM',
+        ),
+        (
+          icon: Icons.calendar_month_outlined,
+          activeIcon: Icons.calendar_month_rounded,
+          label: 'Cycle',
+          emoji: 'CY',
+        ),
+        (
+          icon: Icons.favorite_border_rounded,
+          activeIcon: Icons.favorite_rounded,
+          label: 'Pregnancy',
+          emoji: 'PG',
+        ),
+        (
+          icon: Icons.monitor_heart_outlined,
+          activeIcon: Icons.monitor_heart_rounded,
+          label: 'HHDT',
+          emoji: 'PC',
+        ),
+        (
+          icon: Icons.psychology_outlined,
+          activeIcon: Icons.psychology_rounded,
+          label: 'AI',
+          emoji: 'AI',
+        ),
+        (
+          icon: Icons.person_outline_rounded,
+          activeIcon: Icons.person_rounded,
+          label: 'Profile',
+          emoji: 'PR',
+        ),
+      ];
 
   @override
   Widget build(BuildContext context) {
@@ -122,13 +130,17 @@ class _HomeShellScreenState extends State<HomeShellScreen>
           DashboardScreen(onQuickActionTap: _jumpToTab),
           CycleTrackerScreen(key: _cycleScreenKey),
           const PregnancyScreen(),
+          const HormonalConditionsScreen(),
           const AIInsightsAndChatScreen(),
           const ProfileScreen(),
         ],
       ),
       floatingActionButton: _currentIndex == 1
           ? ScaleTransition(
-              scale: CurvedAnimation(parent: _fabController, curve: Curves.easeOutBack),
+              scale: CurvedAnimation(
+                parent: _fabController,
+                curve: Curves.easeOutBack,
+              ),
               child: FloatingActionButton.extended(
                 key: const ValueKey<String>('addCycleFab'),
                 onPressed: _handleAddCycle,
@@ -153,8 +165,6 @@ class _HomeShellScreenState extends State<HomeShellScreen>
   }
 }
 
-// ── Premium Bottom Nav ────────────────────────────────────────────────────────
-
 class _BottomNavBar extends StatelessWidget {
   const _BottomNavBar({
     required this.currentIndex,
@@ -164,13 +174,17 @@ class _BottomNavBar extends StatelessWidget {
 
   final int currentIndex;
   final ValueChanged<int> onTap;
-  final List<({IconData icon, IconData activeIcon, String label, String emoji})> tabs;
+  final List<({IconData icon, IconData activeIcon, String label, String emoji})>
+      tabs;
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       minimum: const EdgeInsets.fromLTRB(
-        AppSpacing.sm, 0, AppSpacing.sm, AppSpacing.sm,
+        AppSpacing.sm,
+        0,
+        AppSpacing.sm,
+        AppSpacing.sm,
       ),
       child: Container(
         decoration: BoxDecoration(
@@ -256,11 +270,13 @@ class _NavItemState extends State<_NavItem>
     super.dispose();
   }
 
-  void _onTapDown(_) => _ctrl.reverse();
-  void _onTapUp(_) {
+  void _onTapDown(TapDownDetails _) => _ctrl.reverse();
+
+  void _onTapUp(TapUpDetails _) {
     _ctrl.forward();
     widget.onTap();
   }
+
   void _onTapCancel() => _ctrl.forward();
 
   @override
@@ -289,7 +305,9 @@ class _NavItemState extends State<_NavItem>
                 child: Icon(
                   widget.icon,
                   key: ValueKey<bool>(widget.isActive),
-                  color: widget.isActive ? AppColors.primary : AppColors.textMuted,
+                  color: widget.isActive
+                      ? AppColors.primary
+                      : AppColors.textMuted,
                   size: 22,
                 ),
               ),
@@ -297,9 +315,13 @@ class _NavItemState extends State<_NavItem>
               Text(
                 widget.label,
                 style: TextStyle(
-                  color: widget.isActive ? AppColors.primary : AppColors.textMuted,
+                  color: widget.isActive
+                      ? AppColors.primary
+                      : AppColors.textMuted,
                   fontSize: 10,
-                  fontWeight: widget.isActive ? FontWeight.w700 : FontWeight.w500,
+                  fontWeight: widget.isActive
+                      ? FontWeight.w700
+                      : FontWeight.w500,
                 ),
               ),
             ],
@@ -309,8 +331,6 @@ class _NavItemState extends State<_NavItem>
     );
   }
 }
-
-// ── AI Insights + Chat Combined ───────────────────────────────────────────────
 
 class AIInsightsAndChatScreen extends StatefulWidget {
   const AIInsightsAndChatScreen({super.key});
@@ -342,7 +362,6 @@ class _AIInsightsAndChatScreenState extends State<AIInsightsAndChatScreen>
       backgroundColor: AppColors.background,
       body: Column(
         children: [
-          // Premium tab switcher
           Container(
             color: AppColors.background,
             padding: EdgeInsets.only(
@@ -369,7 +388,8 @@ class _AIInsightsAndChatScreenState extends State<AIInsightsAndChatScreen>
                   gradient: const LinearGradient(
                     colors: [AppColors.primary, AppColors.secondaryPink],
                   ),
-                  borderRadius: BorderRadius.circular(AppSpacing.chipRadius),
+                  borderRadius:
+                      BorderRadius.circular(AppSpacing.chipRadius),
                 ),
                 indicatorSize: TabBarIndicatorSize.tab,
                 dividerColor: Colors.transparent,

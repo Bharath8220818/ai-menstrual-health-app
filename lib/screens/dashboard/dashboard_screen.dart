@@ -70,6 +70,8 @@ class DashboardScreen extends StatelessWidget {
                 // Daily recommendation section
                 _DailyRecommendations(cycle: cycle),
                 const SizedBox(height: AppSpacing.md),
+                _PcodFocusCard(cycle: cycle, onTap: () => onQuickActionTap?.call(3)),
+                const SizedBox(height: AppSpacing.md),
                 // Quick actions (5 actions)
                 _QuickActionsGrid(onTap: onQuickActionTap),
                 const SizedBox(height: AppSpacing.md),
@@ -626,6 +628,161 @@ class _RecommendationCard extends StatelessWidget {
   }
 }
 
+class _PcodFocusCard extends StatelessWidget {
+  const _PcodFocusCard({
+    required this.cycle,
+    required this.onTap,
+  });
+
+  final CycleProvider cycle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final tracked = cycle.trackedPcodSymptoms;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFFFFF1E6), Color(0xFFFFFBF7)],
+          ),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+          border: Border.all(color: const Color(0xFFF2C29B)),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFFEF6C00).withValues(alpha: 0.12),
+              blurRadius: 18,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFE3CC),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: const Icon(
+                    Icons.monitor_heart_rounded,
+                    color: Color(0xFFEF6C00),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Text(
+                    'Hormonal Health Disorder Tracker',
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.textDark,
+                    ),
+                  ),
+                ),
+                const Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 14,
+                  color: Color(0xFFEF6C00),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              tracked.isEmpty
+                  ? 'Open HHDT to compare tracked symptoms with common hormonal and reproductive health condition patterns.'
+                  : 'Tracked signs: ${tracked.take(4).join(', ')}',
+              style: const TextStyle(
+                color: AppColors.textDark,
+                fontWeight: FontWeight.w600,
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 12),
+            const Row(
+              children: [
+                Expanded(
+                  child: _PcodMiniTip(
+                    title: 'What to do',
+                    text: 'Walk, strength train, and sleep on schedule.',
+                  ),
+                ),
+                SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: _PcodMiniTip(
+                    title: 'What to eat',
+                    text: 'Protein, fiber, low-GI carbs, nuts, and seeds.',
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              'Other problems to watch: acne, hair thinning, facial hair growth, cravings, dark patches, heavy bleeding, and pelvic pain.',
+              style: TextStyle(
+                color: AppColors.textMuted,
+                fontSize: 12,
+                height: 1.45,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PcodMiniTip extends StatelessWidget {
+  const _PcodMiniTip({
+    required this.title,
+    required this.text,
+  });
+
+  final String title;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AppSpacing.radius),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              color: Color(0xFFEF6C00),
+              fontWeight: FontWeight.w700,
+              fontSize: 12,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            text,
+            style: const TextStyle(
+              color: AppColors.textMuted,
+              fontSize: 11,
+              height: 1.4,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 // ─── Quick Actions Grid ──────────────────────────────────────────────────────
 class _QuickActionsGrid extends StatelessWidget {
   const _QuickActionsGrid({this.onTap});
@@ -667,7 +824,7 @@ class _QuickActionsGrid extends StatelessWidget {
         icon: Icons.chat_rounded,
         emoji: '🤖',
         gradient: const LinearGradient(colors: [Color(0xFF00695C), Color(0xFF26A69A)]),
-        onPressed: () => onTap?.call(3),
+        onPressed: () => onTap?.call(4),
       ),
     ];
 

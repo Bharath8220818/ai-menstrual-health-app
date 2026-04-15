@@ -5,6 +5,19 @@ import 'package:flutter/material.dart';
 import 'package:femi_friendly/models/cycle_entry.dart';
 
 class CycleProvider extends ChangeNotifier {
+  static const Set<String> _pcodSymptomKeywords = <String>{
+    'irregular cycle',
+    'acne flare-ups',
+    'weight gain',
+    'facial hair growth',
+    'hair thinning',
+    'dark neck/underarm patches',
+    'pelvic pain',
+    'heavy bleeding',
+    'sugar cravings',
+    'difficulty sleeping',
+  };
+
   final List<CycleEntry> _entries = <CycleEntry>[
     CycleEntry(
       startDate: DateTime.now().subtract(const Duration(days: 30)),
@@ -31,6 +44,65 @@ class CycleProvider extends ChangeNotifier {
     final sorted = List<CycleEntry>.from(_entries)
       ..sort((a, b) => b.startDate.compareTo(a.startDate));
     return List<CycleEntry>.unmodifiable(sorted);
+  }
+
+  List<String> get trackedSymptoms {
+    final seen = <String>{};
+    final symptoms = <String>[];
+
+    for (final entry in history) {
+      final parts = entry.symptom
+          .split(RegExp(r'[,\u2022]'))
+          .map((value) => value.trim())
+          .where((value) => value.isNotEmpty);
+
+      for (final part in parts) {
+        final normalized = part.toLowerCase();
+        if (normalized.contains('flow')) continue;
+        if (seen.add(normalized)) {
+          symptoms.add(part);
+        }
+      }
+    }
+
+    return symptoms;
+  }
+
+  List<String> get trackedPcodSymptoms {
+    return trackedSymptoms
+        .where(
+          (symptom) => _pcodSymptomKeywords.contains(symptom.toLowerCase()),
+        )
+        .toList();
+  }
+
+  bool get hasPcodPattern {
+    return trackedPcodSymptoms.isNotEmpty || predictedCycleLength > 35;
+  }
+
+  List<String> get pcodSupportTips {
+    final tips = <String>[];
+
+    if (predictedCycleLength > 35) {
+      tips.add(
+        'Longer cycles can happen with PCOD. Keep logging for 2-3 months and plan a gynecologist review if this continues.',
+      );
+    }
+    if (trackedPcodSymptoms.isNotEmpty) {
+      tips.add(
+        'Tracked signs like ${trackedPcodSymptoms.take(3).join(', ')} can be associated with PCOD and are worth monitoring closely.',
+      );
+    }
+
+    tips.addAll(<String>[
+      'What to do: aim for 30 minutes of walking, strength work, or yoga most days to support insulin sensitivity.',
+      'What to eat: choose high-fiber, high-protein meals like eggs, dal, Greek yogurt, nuts, seeds, vegetables, and low-GI fruits.',
+      'Limit sugary drinks, ultra-processed snacks, and long gaps between meals if you notice fatigue, cravings, or cycle swings.',
+      'Other problems to watch: acne, unwanted facial hair, scalp hair thinning, weight changes, dark skin patches, and trouble sleeping.',
+      'Seek medical care sooner for severe pelvic pain, very heavy bleeding, missed periods for 3+ months, or rapid symptom worsening.',
+    ]);
+
+    return tips;
   }
 
   void updateSelectedDate(DateTime value) {
