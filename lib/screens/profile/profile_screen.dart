@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 
 import 'package:femi_friendly/core/constants/app_colors.dart';
 import 'package:femi_friendly/core/constants/app_spacing.dart';
@@ -51,19 +54,19 @@ class ProfileScreen extends StatelessWidget {
                       color: AppColors.warning.withValues(alpha: 0.3),
                     ),
                   ),
-                  child: Row(
+                  child: const Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.health_and_safety_outlined,
                         color: AppColors.warning,
                         size: 18,
                       ),
-                      const SizedBox(width: 8),
+                      SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           AppStrings.disclaimer,
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: AppColors.warning,
                             fontSize: 12,
                             height: 1.5,
@@ -163,8 +166,15 @@ class _ProfileHeader extends StatelessWidget {
                     width: 3,
                   ),
                 ),
-                child: const Center(
-                  child: Text('👩', style: TextStyle(fontSize: 40)),
+                child: ClipOval(
+                  child: auth.avatarPath != null
+                      ? Image.file(
+                          File(auth.avatarPath!),
+                          width: 90,
+                          height: 90,
+                          fit: BoxFit.cover,
+                        )
+                      : const Center(child: Text('👩', style: TextStyle(fontSize: 40))),
                 ),
               ),
               GestureDetector(
@@ -229,37 +239,223 @@ class _ProfileHeader extends StatelessWidget {
   }
 
   void _showEditProfileDialog(BuildContext context) {
-    final nameCtrl = TextEditingController(text: context.read<AuthProvider>().name);
+    final auth = context.read<AuthProvider>();
+    final nameCtrl = TextEditingController(text: auth.name);
+    final weightCtrl = TextEditingController(text: auth.weight.toString());
+    final heightCtrl = TextEditingController(text: auth.height.toString());
+    DateTime? selectedDate = auth.birthday;
+    String? pickedAvatar = auth.avatarPath;
 
     showDialog<void>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.radius),
-        ),
-        title: const Text('Edit Profile', style: TextStyle(fontWeight: FontWeight.w700)),
-        content: TextField(
-          controller: nameCtrl,
-          decoration: const InputDecoration(
-            labelText: 'Display Name',
-            prefixIcon: Icon(Icons.person_rounded, color: AppColors.primary),
+      builder: (ctx) => StatefulBuilder(builder: (ctx, setState) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppSpacing.radius),
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+          title: const Text('Edit Profile', style: TextStyle(fontWeight: FontWeight.w700)),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 72,
+                      height: 72,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: AppColors.accent.withValues(alpha: 0.2)),
+                      ),
+                        child: ClipOval(
+                        child: pickedAvatar != null
+                            ? Image.file(File(pickedAvatar!), width: 72, height: 72, fit: BoxFit.cover)
+                            : const Center(child: Text('👩', style: TextStyle(fontSize: 28))),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ElevatedButton.icon(
+                            onPressed: () {
+                              showModalBottomSheet<void>(
+                                context: ctx,
+                                builder: (sheetCtx) => SafeArea(
+                                  child: Wrap(
+                                    children: [
+                                      ListTile(
+                                        leading: const Icon(Icons.camera_alt),
+                                        title: const Text('Take Photo'),
+                                        onTap: () async {
+                                          final picker = ImagePicker();
+                                          final XFile? file = await picker.pickImage(
+                                            source: ImageSource.camera,
+                                            maxWidth: 1200,
+                                            maxHeight: 1200,
+                                            imageQuality: 85,
+                                          );
+                                          if (file != null) {
+                                            final p = file.path.toLowerCase();
+                                            if (p.endsWith('.png') || p.endsWith('.jpg') || p.endsWith('.jpeg')) {
+                                              setState(() => pickedAvatar = file.path);
+                                            } else {
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                const SnackBar(content: Text('Please select a PNG or JPG image.')),
+                                              );
+                                            }
+                                          }
+                                          Navigator.pop(sheetCtx);
+                                        },
+                                      ),
+                                      ListTile(
+                                        leading: const Icon(Icons.photo_library_outlined),
+                                        title: const Text('Choose From Gallery'),
+                                        onTap: () async {
+                                          final picker = ImagePicker();
+                                          final XFile? file = await picker.pickImage(
+                                            source: ImageSource.gallery,
+                                            maxWidth: 1200,
+                                            maxHeight: 1200,
+                                            imageQuality: 85,
+                                          );
+                                          if (file != null) {
+                                            final p = file.path.toLowerCase();
+                                            if (p.endsWith('.png') || p.endsWith('.jpg') || p.endsWith('.jpeg')) {
+                                              setState(() => pickedAvatar = file.path);
+                                            } else {
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                const SnackBar(content: Text('Please select a PNG or JPG image.')),
+                                              );
+                                            }
+                                          }
+                                          Navigator.pop(sheetCtx);
+                                        },
+                                      ),
+                                                  if (pickedAvatar != null)
+                                                    ListTile(
+                                                      leading: const Icon(Icons.delete_outline),
+                                                      title: const Text('Remove Photo'),
+                                                      onTap: () {
+                                                        setState(() => pickedAvatar = null);
+                                                        Navigator.pop(sheetCtx);
+                                                      },
+                                                    ),
+                                                  ListTile(
+                                                    leading: const Icon(Icons.close),
+                                                    title: const Text('Cancel'),
+                                                    onTap: () => Navigator.pop(sheetCtx),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        icon: const Icon(Icons.photo_library_outlined),
+                                        label: const Text('Change Photo'),
+                                        style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+                                      ),
+                          if (pickedAvatar != null)
+                            TextButton(
+                              onPressed: () => setState(() => pickedAvatar = null),
+                              child: const Text('Remove Photo'),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: nameCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Display Name',
+                    prefixIcon: Icon(Icons.person_rounded, color: AppColors.primary),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: weightCtrl,
+                        keyboardType: TextInputType.numberWithOptions(decimal: true),
+                        decoration: const InputDecoration(
+                          labelText: 'Weight (kg)',
+                          prefixIcon: Icon(Icons.monitor_weight_rounded, color: AppColors.primary),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: TextField(
+                        controller: heightCtrl,
+                        keyboardType: TextInputType.numberWithOptions(decimal: true),
+                        decoration: const InputDecoration(
+                          labelText: 'Height (cm)',
+                          prefixIcon: Icon(Icons.height, color: AppColors.primary),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    const Icon(Icons.cake, color: AppColors.primary),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        selectedDate != null ? DateFormat.yMMMd().format(selectedDate!) : 'Birthday not set',
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () async {
+                        final now = DateTime.now();
+                        final picked = await showDatePicker(
+                          context: ctx,
+                          initialDate: selectedDate ?? DateTime(now.year - 25),
+                          firstDate: DateTime(1900),
+                          lastDate: now,
+                        );
+                        if (picked != null) setState(() => selectedDate = picked);
+                      },
+                      child: const Text('Choose'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
-          ElevatedButton(
-            onPressed: () {
-              context.read<AuthProvider>().updateProfile(name: nameCtrl.text);
-              Navigator.pop(ctx);
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-            child: const Text('Save'),
-          ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final parsedWeight = double.tryParse(weightCtrl.text) ?? auth.weight;
+                final parsedHeight = double.tryParse(heightCtrl.text) ?? auth.height;
+                // If user cleared the photo, pickedAvatar will be null — pass empty string
+                // to indicate explicit removal. Otherwise pass the selected path.
+                final avatarParam = pickedAvatar ?? '';
+                context.read<AuthProvider>().updateProfile(
+                      name: nameCtrl.text.trim(),
+                      weight: parsedWeight,
+                      height: parsedHeight,
+                      birthday: selectedDate,
+                      avatarPath: avatarParam,
+                    );
+                Navigator.pop(ctx);
+              },
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      }),
     );
   }
 }

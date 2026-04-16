@@ -3,7 +3,10 @@ import 'package:provider/provider.dart';
 
 import 'package:femi_friendly/core/constants/app_colors.dart';
 import 'package:femi_friendly/core/constants/app_spacing.dart';
+import 'package:femi_friendly/providers/auth_provider.dart';
 import 'package:femi_friendly/providers/cycle_provider.dart';
+import 'package:femi_friendly/providers/insights_provider.dart';
+import 'package:femi_friendly/providers/pregnancy_provider.dart';
 
 /// Comprehensive AI Insights Screen with Fertility window integration
 class AIInsightsScreen extends StatefulWidget {
@@ -27,13 +30,27 @@ class _AIInsightsScreenState extends State<AIInsightsScreen>
       duration: const Duration(milliseconds: 600),
     );
     _fadeAnim = CurvedAnimation(parent: _fadeController, curve: Curves.easeOut);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _bootstrapInsights());
+  }
 
-    Future<void>.delayed(const Duration(milliseconds: 1200), () {
-      if (mounted) {
-        setState(() => _isLoading = false);
-        _fadeController.forward();
-      }
-    });
+  Future<void> _bootstrapInsights() async {
+    final auth = context.read<AuthProvider>();
+    final cycle = context.read<CycleProvider>();
+    final pregnancy = context.read<PregnancyProvider>();
+    final insights = context.read<InsightsProvider>();
+
+    await Future.wait([
+      insights.fetchInsights(
+        auth: auth,
+        cycle: cycle,
+        pregnancy: pregnancy,
+      ),
+      Future<void>.delayed(const Duration(milliseconds: 800)),
+    ]);
+
+    if (!mounted) return;
+    setState(() => _isLoading = false);
+    _fadeController.forward();
   }
 
   @override
@@ -45,12 +62,89 @@ class _AIInsightsScreenState extends State<AIInsightsScreen>
   @override
   Widget build(BuildContext context) {
     final cycle = context.watch<CycleProvider>();
+    final insights = context.watch<InsightsProvider>();
+    final day = cycle.currentDayInCycle;
+
+    final cycleLengthLabel =
+        '${insights.cycleLength ?? cycle.predictedCycleLength} days';
+    final cycleSubtitle = insights.cycleStatus != null
+        ? 'AI API status: ${insights.cycleStatus}'
+        : 'Based on your last ${cycle.history.length} cycles';
+
+    final waterLabel = insights.waterIntake != null
+        ? '${insights.waterIntake!.toStringAsFixed(1)}L / day'
+        : '2.5L / day';
+
+    final foodValue = insights.foodRecommendations.isNotEmpty
+        ? insights.foodRecommendations.first
+        : _getFoodValue(day);
+
+    final foodTips = insights.foodRecommendations.isNotEmpty
+        ? insights.foodRecommendations
+            .take(3)
+            .map((item) => 'Include $item in your meals this phase')
+            .toList()
+        : _getFoodTips(day);
+
+    final waterTips = insights.healthTips.isNotEmpty
+        ? insights.healthTips.take(3).toList()
+        : <String>[
+            'Drink at least 8 glasses per day',
+            'Add lemon or cucumber for electrolytes',
+            'Herbal teas count towards daily intake',
+          ];
+
+    final wellnessTips = insights.healthTips.isNotEmpty
+        ? insights.healthTips.take(3).toList()
+        : <String>[
+            'Consistent sleep schedule regulates hormones',
+            'Reduce screen time 1 hour before bed',
+            'Light stretching before sleep reduces cramps',
+          ];
+
+    final pregnancyLabel = insights.pregnancyChance ?? _getPregnancyChance(day);
+    final pregnancyTips = insights.fertilityWindow.isNotEmpty
+        ? <String>[
+            'Estimated fertile window: Day ${insights.fertilityWindow.first}–${insights.fertilityWindow.last}',
+            if (insights.pregnancyProbability != null)
+              'Predicted pregnancy probability: ${(insights.pregnancyProbability! * 100).toStringAsFixed(1)}%',
+            'Use cycle + symptom logging daily for better model confidence',
+          ]
+        : _getPregnancyTips(day);
 
     return Scaffold(
       backgroundColor: AppColors.background,
       body: CustomScrollView(
         slivers: [
           SliverToBoxAdapter(child: _InsightsHeader(cycle: cycle)),
+          if (!_isLoading && insights.error != null)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.md,
+                  AppSpacing.sm,
+                  AppSpacing.md,
+                  0,
+                ),
+                child: Container(
+                  padding: const EdgeInsets.all(AppSpacing.sm),
+                  decoration: BoxDecoration(
+                    color: AppColors.warningLight,
+                    borderRadius: BorderRadius.circular(AppSpacing.radius),
+                    border: Border.all(
+                      color: AppColors.warning.withValues(alpha: 0.35),
+                    ),
+                  ),
+                  child: Text(
+                    'Using fallback insights: ${insights.error}',
+                    style: const TextStyle(
+                      color: AppColors.warning,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ),
+            ),
           if (_isLoading)
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(
@@ -84,13 +178,14 @@ class _AIInsightsScreenState extends State<AIInsightsScreen>
                         _buildInsightCard(
                           index: 0,
                           title: 'Cycle Prediction',
-                          value: '${cycle.predictedCycleLength} days',
-                          subtitle: 'Based on your last ${cycle.history.length} cycles',
+                          value: cycleLengthLabel,
+                          subtitle: cycleSubtitle,
                           emoji: '📊',
                           gradient: const [Color(0xFFE91E63), Color(0xFFFF4081)],
                           tips: [
                             'Your cycle is ${cycle.cycleStatus == "Normal" ? "within the normal range (21–35 days)" : "irregular — consult a doctor"}',
-                            'Next ovulation estimated on Day 14',
+                            if (insights.cyclePhase != null)
+                              'Model phase estimate: ${insights.cyclePhase}',
                             'Track symptoms daily for better accuracy',
                           ],
                         ),
@@ -101,25 +196,25 @@ class _AIInsightsScreenState extends State<AIInsightsScreen>
                         _buildInsightCard(
                           index: 1,
                           title: 'Water Intake',
-                          value: '2.5L / day',
-                          subtitle: 'Recommended during your current phase',
+                          value: waterLabel,
+                          subtitle: insights.waterIntake != null
+                              ? 'Personalized from your profile'
+                              : 'Recommended during your current phase',
                           emoji: '💧',
                           gradient: const [Color(0xFF2196F3), Color(0xFF42A5F5)],
-                          tips: [
-                            'Drink at least 8 glasses per day',
-                            'Add lemon or cucumber for electrolytes',
-                            'Herbal teas count towards daily intake',
-                          ],
+                          tips: waterTips,
                         ),
                         const SizedBox(height: AppSpacing.md),
                         _buildInsightCard(
                           index: 2,
                           title: 'Food Recommendations',
-                          value: _getFoodValue(cycle.currentDayInCycle),
-                          subtitle: 'Priority nutrients for your phase',
+                          value: foodValue,
+                          subtitle: insights.foodRecommendations.isNotEmpty
+                              ? 'AI-generated nutrition suggestions'
+                              : 'Priority nutrients for your phase',
                           emoji: '🥗',
                           gradient: const [Color(0xFF4CAF50), Color(0xFF66BB6A)],
-                          tips: _getFoodTips(cycle.currentDayInCycle),
+                          tips: foodTips,
                         ),
                         const SizedBox(height: AppSpacing.md),
                         _buildInsightCard(
@@ -129,21 +224,19 @@ class _AIInsightsScreenState extends State<AIInsightsScreen>
                           subtitle: 'Personalized wellness for your phase',
                           emoji: '✨',
                           gradient: const [Color(0xFF9C27B0), Color(0xFFAB47BC)],
-                          tips: [
-                            'Consistent sleep schedule regulates hormones',
-                            'Reduce screen time 1 hour before bed',
-                            'Light stretching before sleep reduces cramps',
-                          ],
+                          tips: wellnessTips,
                         ),
                         const SizedBox(height: AppSpacing.md),
                         _buildInsightCard(
                           index: 4,
                           title: 'Pregnancy Chance',
-                          value: _getPregnancyChance(cycle.currentDayInCycle),
-                          subtitle: 'Based on your current cycle day',
+                          value: pregnancyLabel,
+                          subtitle: insights.pregnancyProbability != null
+                              ? 'Model-assisted probability estimate'
+                              : 'Based on your current cycle day',
                           emoji: '🤰',
                           gradient: const [Color(0xFFFF6F00), Color(0xFFFFB300)],
-                          tips: _getPregnancyTips(cycle.currentDayInCycle),
+                          tips: pregnancyTips,
                         ),
                         const SizedBox(height: AppSpacing.md),
                         _DisclaimerCard(),
@@ -605,12 +698,12 @@ class _FertilityStrip extends StatelessWidget {
           }).toList(),
         ),
         const SizedBox(height: 6),
-        Row(
+        const Row(
           children: [
-            _Legend(color: const Color(0xFF9C27B0), label: 'Ovulation'),
-            const SizedBox(width: 12),
+            _Legend(color: Color(0xFF9C27B0), label: 'Ovulation'),
+            SizedBox(width: 12),
             _Legend(color: AppColors.primary, label: 'Fertile'),
-            const SizedBox(width: 12),
+            SizedBox(width: 12),
             _Legend(color: Colors.amber, label: 'Today'),
           ],
         ),

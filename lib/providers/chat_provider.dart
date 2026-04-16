@@ -3,8 +3,12 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import 'package:femi_friendly/models/chat_message.dart';
+import 'package:femi_friendly/services/api_client.dart';
 
 class ChatProvider extends ChangeNotifier {
+  ChatProvider({ApiClient? apiClient}) : _apiClient = apiClient ?? ApiClient();
+
+  final ApiClient _apiClient;
   final Random _random = Random();
 
   final List<ChatMessage> _messages = <ChatMessage>[
@@ -39,19 +43,61 @@ class ChatProvider extends ChangeNotifier {
     _isTyping = true;
     notifyListeners();
 
-    // Simulated AI thinking delay (realistic)
-    final delay = 800 + _random.nextInt(600);
+    final delay = 450 + _random.nextInt(400);
     await Future<void>.delayed(Duration(milliseconds: delay));
 
+    final reply = await sendMessageToApi(text);
     _messages.add(
       ChatMessage(
-        text: _buildSmartResponse(text),
+        text: reply,
         isUser: false,
         timestamp: DateTime.now(),
       ),
     );
     _isTyping = false;
     notifyListeners();
+  }
+
+  Future<String> sendMessageToApi(String text) async {
+    final context = _buildChatContext(text);
+    try {
+      final response = await _apiClient.sendChatMessage(
+        message: text,
+        history: context['history']! as List<Map<String, String>>,
+      );
+      final reply = _extractAssistantReply(response);
+      if (reply.isNotEmpty) {
+        return reply;
+      }
+    } catch (_) {
+      // Fallback handled below.
+    }
+    return _buildSmartResponse(text);
+  }
+
+  Map<String, dynamic> _buildChatContext(String text) {
+    final start = _messages.length > 8 ? _messages.length - 8 : 0;
+    final recent = _messages.sublist(start);
+    final history = recent
+        .map(
+          (msg) => <String, String>{
+            'role': msg.isUser ? 'user' : 'assistant',
+            'content': msg.text,
+          },
+        )
+        .toList();
+    return <String, dynamic>{
+      'message': text,
+      'history': history,
+    };
+  }
+
+  String _extractAssistantReply(Map<String, dynamic> response) {
+    final raw = response['reply'] ?? response['message'] ?? response['text'];
+    if (raw is String && raw.trim().isNotEmpty) {
+      return raw.trim();
+    }
+    return '';
   }
 
   Future<void> clearChat() async {
@@ -141,7 +187,6 @@ class ChatProvider extends ChangeNotifier {
       return '📊 A **normal menstrual cycle** is 21–35 days, with the average being 28 days. Period duration is typically 3–7 days.\n\n• Short cycles (<21 days): may indicate hormonal imbalance\n• Long cycles (>35 days): PCOS or thyroid issues possible\n\nTrack at least 3 cycles for an accurate average. Your data in the Cycle tab will help! 🌸';
     }
 
-    // Default smart fallbacks
     final fallbacks = <String>[
       '🌸 That\'s a great question! I\'d recommend logging that as a symptom in your Cycle tracker for better AI insights over time.',
       '💙 I\'m here to help! Could you tell me more about what you\'re experiencing? The more detail, the better I can assist.',

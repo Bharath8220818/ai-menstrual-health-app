@@ -119,13 +119,13 @@ class _PregnancyScreenState extends State<PregnancyScreen>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
+              const Row(
                 children: [
-                  const Text('🤰', style: TextStyle(fontSize: 24)),
-                  const SizedBox(width: 10),
+                  Text('🤰', style: TextStyle(fontSize: 24)),
+                  SizedBox(width: 10),
                   Text(
                     'Pregnancy Mode',
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w800,
                       fontSize: 20,
@@ -184,7 +184,7 @@ class _PregnancyScreenState extends State<PregnancyScreen>
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 12),
-          Text(
+          const Text(
             'Enable Pregnancy Mode to track baby growth, get trimester-specific tips, and monitor your health week by week.',
             style: TextStyle(
               color: AppColors.textMuted,
@@ -385,7 +385,7 @@ class _PregnancyScreenState extends State<PregnancyScreen>
               width: 120,
               height: 120,
               decoration: BoxDecoration(
-                gradient: RadialGradient(
+                gradient: const RadialGradient(
                   colors: [
                     AppColors.accentLight,
                     AppColors.background,
@@ -553,12 +553,12 @@ class _PregnancyScreenState extends State<PregnancyScreen>
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
-            Expanded(
+            const Expanded(
               child: _HealthStatCard(
                 emoji: '😴',
                 label: 'Sleep',
                 value: '8–9 hrs',
-                color: const Color(0xFF9C27B0),
+                color: Color(0xFF9C27B0),
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
@@ -597,7 +597,7 @@ class _PregnancyScreenState extends State<PregnancyScreen>
         children: [
           Container(
             padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: AppColors.accentLight,
               shape: BoxShape.circle,
             ),

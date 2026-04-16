@@ -20,6 +20,8 @@ dependencies:
   intl: ^0.20.0
   shimmer: ^3.0.0
   percent_indicator: ^4.2.3
+  image_picker: ^0.8.7+5
+  dio: ^5.0.0
 
   cupertino_icons: ^1.0.8
 

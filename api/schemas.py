@@ -35,10 +35,23 @@ class BasePredict(BaseModel):
     weight_kg: Optional[float] = None
     exercise_minutes_per_day: Optional[float] = None
     symptoms: Optional[List[str]] = []
+    cycle_day: Optional[int] = None
 
 
 class RecommendInput(BasePredict):
     pass
+
+
+class ChatHistoryItem(BaseModel):
+    role: str
+    content: str
+
+
+class ChatInput(BaseModel):
+    message: str
+    history: Optional[List[ChatHistoryItem]] = None
+    profile: Optional[dict] = None
+    cycle: Optional[dict] = None
 
 
 class CycleResponse(BaseModel):

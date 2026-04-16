@@ -329,8 +329,8 @@ class _SuggestionChips extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.only(bottom: 6),
+          const Padding(
+            padding: EdgeInsets.only(bottom: 6),
             child: Text(
               'Try asking:',
               style: TextStyle(

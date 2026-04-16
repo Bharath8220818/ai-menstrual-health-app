@@ -9,7 +9,9 @@ import 'package:femi_friendly/screens/notification/notification_screen.dart';
 import 'package:femi_friendly/screens/phase/phase_detail_screen.dart';
 import 'package:femi_friendly/screens/setup/profile_setup_screen.dart';
 import 'package:femi_friendly/screens/splash/splash_screen.dart';
+import 'package:femi_friendly/screens/landing/landing_screen.dart';
 import 'package:femi_friendly/screens/water/water_tracker_screen.dart';
+import 'package:femi_friendly/screens/debug/profile_test_screen.dart';
 
 class AppRoutes {
   AppRoutes._();
@@ -29,6 +31,8 @@ class AppRoutes {
   static const String aiInsights = '/ai-insights';
   static const String chatbot = '/chatbot';
   static const String profile = '/profile';
+  static const String landing = '/landing';
+  static const String debugProfileTest = '/debug-profile-test';
 
   // Feature screens
   static const String notifications = '/notifications';
@@ -55,6 +59,8 @@ class AppRoutes {
         );
       case dashboard:
         page = const HomeShellScreen(initialIndex: 0);
+      case landing:
+        page = const LandingScreen();
       case cycleTracker:
         page = const HomeShellScreen(initialIndex: 1);
       case pregnancy:
@@ -74,6 +80,8 @@ class AppRoutes {
             ? settings.arguments! as CyclePhase
             : CyclePhase.menstrual;
         page = PhaseDetailScreen(phase: phase);
+      case debugProfileTest:
+        page = const ProfileTestScreen();
       default:
         page = const SplashScreen();
     }

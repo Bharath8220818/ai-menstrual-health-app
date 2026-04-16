@@ -101,11 +101,11 @@ class _WaterTrackerScreenState extends State<WaterTrackerScreen>
                         color: const Color(0xFF1565C0).withValues(alpha: 0.2),
                       ),
                     ),
-                    child: Row(
+                    child: const Row(
                       children: [
-                        const Text('💧', style: TextStyle(fontSize: 22)),
-                        const SizedBox(width: 10),
-                        const Expanded(
+                        Text('💧', style: TextStyle(fontSize: 22)),
+                        SizedBox(width: 10),
+                        Expanded(
                           child: Text(
                             'During menstrual phase, drink extra water to reduce bloating & cramps.',
                             style: TextStyle(

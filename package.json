@@ -1,0 +1,28 @@
+{
+  "name": "ai-menstrual-health-app",
+  "version": "1.0.0",
+  "description": "A new Flutter project.",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Bharath8220818/ai-menstrual-health-app.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Bharath8220818/ai-menstrual-health-app/issues"
+  },
+  "homepage": "https://github.com/Bharath8220818/ai-menstrual-health-app#readme",
+  "dependencies": {
+    "playwright-core": "^1.59.1"
+  }
+}

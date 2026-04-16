@@ -833,15 +833,15 @@ class _DisclaimerCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppSpacing.radius),
         border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
       ),
-      child: Row(
+      child: const Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.health_and_safety_outlined, color: AppColors.warning, size: 20),
-          const SizedBox(width: AppSpacing.xs),
+          Icon(Icons.health_and_safety_outlined, color: AppColors.warning, size: 20),
+          SizedBox(width: AppSpacing.xs),
           Expanded(
             child: Text(
               AppStrings.disclaimer,
-              style: const TextStyle(color: AppColors.warning, fontSize: 12, height: 1.5),
+              style: TextStyle(color: AppColors.warning, fontSize: 12, height: 1.5),
             ),
           ),
         ],

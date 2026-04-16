@@ -53,6 +53,14 @@
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
+	
+	<!-- Camera & Photo library usage descriptions -->
+	<key>NSCameraUsageDescription</key>
+	<string>Femi-Friendly needs camera access to take profile photos.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Femi-Friendly needs access to your photo library to choose profile photos.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Femi-Friendly may save photos to your photo library.</string>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

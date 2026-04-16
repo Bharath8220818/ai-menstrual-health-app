@@ -288,7 +288,7 @@ class _NavItemState extends State<_NavItem>
                 duration: const Duration(milliseconds: 200),
                 child: Icon(
                   widget.icon,
-                  key: ValueKey<bool>(widget.isActive),
+                  key: ValueKey<String>('nav_${widget.label}_${widget.isActive}'),
                   color: widget.isActive ? AppColors.primary : AppColors.textMuted,
                   size: 22,
                 ),

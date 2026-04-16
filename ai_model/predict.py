@@ -61,6 +61,9 @@ MODEL_PKL = os.path.join(os.path.dirname(os.path.abspath(__file__)), "model.pkl"
 # ── Lazy-loaded bundle (loaded once per process) ──────────────────────────────
 _BUNDLE: dict | None = None
 
+# recommendation engine (separate module)
+from ai_model.recommendation import get_recommendations
+
 
 def _load_bundle() -> dict:
     """Load model.pkl once and cache in module-level variable."""
@@ -72,6 +75,15 @@ def _load_bundle() -> dict:
                 "Run `python ai_model/train.py` first."
             )
         _BUNDLE = joblib.load(MODEL_PKL)
+        # Some Windows environments restrict multiprocessing handles.
+        # Force single-thread inference to keep prediction endpoints stable.
+        for key in ("cycle_length_model", "irregularity_model", "pregnancy_model"):
+            model = _BUNDLE.get(key)
+            if model is not None and hasattr(model, "n_jobs"):
+                try:
+                    model.n_jobs = 1
+                except Exception:
+                    pass
         print("[predict] Model bundle loaded successfully.")
     return _BUNDLE
 
@@ -364,6 +376,100 @@ def _generate_recommendations(inp: dict,
     return recs
 
 
+def detect_cycle_phase(cycle_day: int) -> str:
+    """Return cycle phase given the 1-based cycle day."""
+    try:
+        d = int(cycle_day)
+    except Exception:
+        return "Unknown"
+    if d <= 5:
+        return "Menstrual"
+    if d <= 13:
+        return "Follicular"
+    if d <= 16:
+        return "Ovulation"
+    return "Luteal"
+
+
+def fertility_window(cycle_length: int) -> dict:
+    """Calculate ovulation day and fertility window.
+
+    Returns dict with keys:
+      - ovulation_day (int)
+      - best_days (list[int])
+      - fertility_score (float)  # heuristic 0..1 representing peak chance
+    """
+    try:
+        cl = int(cycle_length)
+    except Exception:
+        cl = 28
+    ovulation_day = max(10, cl - 14)
+    start = max(1, ovulation_day - 2)
+    end = min(cl, ovulation_day + 2)
+    best_days = list(range(start, end + 1))
+    # Simple heuristic: peak probability on ovulation day
+    fertility_score = 0.9
+    return {"ovulation_day": ovulation_day, "best_days": best_days, "fertility_score": fertility_score}
+
+
+def predict_all(user_input: dict) -> dict:
+    """
+    Unified prediction function requested by the project spec.
+
+    Returns JSON-like dict with keys:
+      - pregnancy_chance: "High"/"Medium"/"Low"/"N/A"
+      - fertility_window: list[int]
+      - fertility_probability: float
+      - cycle_phase: str
+      - food: list[str]
+      - tips: list[str]
+    """
+    # Base predictions from existing pipeline
+    res = predict(user_input)
+
+    # Fertility window calculation
+    cycle_length = int(user_input.get("cycle_length", user_input.get("mean_cycle_length", 28)))
+    fw = fertility_window(cycle_length)
+
+    # Cycle phase detection — prefer explicit `cycle_day` if provided
+    cycle_day = int(user_input.get("cycle_day", 1))
+    phase = detect_cycle_phase(cycle_day)
+
+    # Pregnancy chance string
+    preg_prob = res.get("pregnancy_probability")
+    if preg_prob is None:
+        preg_str = "N/A"
+    else:
+        if preg_prob >= 0.66:
+            preg_str = "High"
+        elif preg_prob >= 0.34:
+            preg_str = "Medium"
+        else:
+            preg_str = "Low"
+
+    # Recommendation engine returns food + tips
+    recs = get_recommendations(
+        phase=phase,
+        pregnancy_status=res.get("pregnancy_likelihood"),
+        stress=user_input.get("stress_level"),
+        sleep_hours=user_input.get("sleep_hours"),
+        bmi=user_input.get("bmi"),
+        pcos=user_input.get("pcos"),
+        trying_to_conceive=bool(user_input.get("trying_to_conceive", False)),
+    )
+
+    return {
+        "pregnancy_chance": preg_str,
+        "pregnancy_probability": preg_prob,
+        "fertility_window": fw["best_days"],
+        "fertility_probability": fw["fertility_score"],
+        "cycle_phase": phase,
+        "food": recs.get("food", []),
+        "tips": recs.get("tips", []),
+        "raw": res,
+    }
+
+
 # ──────────────────────────────────────────────────────────────────────────────
 # PUBLIC API
 # ──────────────────────────────────────────────────────────────────────────────
@@ -445,7 +551,7 @@ def predict(user_input: dict) -> dict:
         "cycle_status"            : cycle_status,
         "irregularity_probability": round(irr_prob, 4),
         "pregnancy_likelihood"    : preg_likelihood,
-        "pregnancy_probability"   : round(preg_prob, 4) if preg_prob else None,
+        "pregnancy_probability"   : round(preg_prob, 4) if preg_prob is not None else None,
         "recommendations"         : recommendations,
     }
 

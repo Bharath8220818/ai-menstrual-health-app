@@ -1,0 +1,26 @@
+{
+  "timestamp": "2026-04-14T17:16:19.440Z",
+  "backendHealth": true,
+  "steps": [
+    {
+      "name": "Backend health",
+      "pass": true,
+      "details": "GET /health responded OK"
+    },
+    {
+      "name": "Flutter web-server startup",
+      "pass": true,
+      "details": "App served at http://127.0.0.1:8090"
+    },
+    {
+      "name": "Unhandled test failure",
+      "pass": false,
+      "details": "locator.waitFor: Timeout 120000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByText('Welcome Back') to be visible\u001b[22m\n\n    at run (D:\\project\\ai-menstrual-health-app\\scripts\\web_smoke_test.js:165:42)"
+    }
+  ],
+  "screenshots": [
+    "D:\\project\\ai-menstrual-health-app\\artifacts\\web-smoke\\00_loaded.png",
+    "D:\\project\\ai-menstrual-health-app\\artifacts\\web-smoke\\error_state.png"
+  ],
+  "overallPass": false
+}

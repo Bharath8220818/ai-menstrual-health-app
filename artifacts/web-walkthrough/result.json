@@ -1,0 +1,106 @@
+{
+  "timestamp": "2026-04-14T17:24:57.847Z",
+  "backendHealth": true,
+  "screenshots": [
+    "D:\\project\\ai-menstrual-health-app\\artifacts\\web-walkthrough\\01_login_screen.png",
+    "D:\\project\\ai-menstrual-health-app\\artifacts\\web-walkthrough\\02_home_after_login.png",
+    "D:\\project\\ai-menstrual-health-app\\artifacts\\web-walkthrough\\03_cycle_tab.png",
+    "D:\\project\\ai-menstrual-health-app\\artifacts\\web-walkthrough\\04_pregnancy_tab.png",
+    "D:\\project\\ai-menstrual-health-app\\artifacts\\web-walkthrough\\05_ai_insights_tab.png",
+    "D:\\project\\ai-menstrual-health-app\\artifacts\\web-walkthrough\\06_ai_chat_tab.png",
+    "D:\\project\\ai-menstrual-health-app\\artifacts\\web-walkthrough\\07_profile_tab.png",
+    "D:\\project\\ai-menstrual-health-app\\artifacts\\web-walkthrough\\08_home_return.png"
+  ],
+  "urls": [
+    {
+      "name": "01_login_screen",
+      "url": "http://127.0.0.1:8090/#/login"
+    },
+    {
+      "name": "02_home_after_login",
+      "url": "http://127.0.0.1:8090/#/home"
+    },
+    {
+      "name": "03_cycle_tab",
+      "url": "http://127.0.0.1:8090/#/home"
+    },
+    {
+      "name": "04_pregnancy_tab",
+      "url": "http://127.0.0.1:8090/#/home"
+    },
+    {
+      "name": "05_ai_insights_tab",
+      "url": "http://127.0.0.1:8090/#/home"
+    },
+    {
+      "name": "06_ai_chat_tab",
+      "url": "http://127.0.0.1:8090/#/home"
+    },
+    {
+      "name": "07_profile_tab",
+      "url": "http://127.0.0.1:8090/#/home"
+    },
+    {
+      "name": "08_home_return",
+      "url": "http://127.0.0.1:8090/#/home"
+    }
+  ],
+  "steps": [
+    {
+      "name": "Backend health",
+      "pass": true,
+      "notes": "http://127.0.0.1:8000/health"
+    },
+    {
+      "name": "Flutter web server",
+      "pass": true,
+      "notes": "http://127.0.0.1:8090"
+    },
+    {
+      "name": "Login screen capture",
+      "pass": true,
+      "notes": ""
+    },
+    {
+      "name": "Login action via UI",
+      "pass": false,
+      "notes": "URL after click: http://127.0.0.1:8090/#/login"
+    },
+    {
+      "name": "Home screen available",
+      "pass": true,
+      "notes": "URL after home fallback: http://127.0.0.1:8090/#/home"
+    },
+    {
+      "name": "Cycle tab click",
+      "pass": true,
+      "notes": ""
+    },
+    {
+      "name": "Pregnancy tab click",
+      "pass": true,
+      "notes": ""
+    },
+    {
+      "name": "AI insights tab click",
+      "pass": true,
+      "notes": ""
+    },
+    {
+      "name": "AI chat send message",
+      "pass": true,
+      "notes": ""
+    },
+    {
+      "name": "Profile tab click",
+      "pass": true,
+      "notes": ""
+    },
+    {
+      "name": "Home return click",
+      "pass": true,
+      "notes": ""
+    }
+  ],
+  "pass": false
+}

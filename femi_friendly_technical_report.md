@@ -1,80 +1,211 @@
-# Femi-Friendly: Technical Architecture & Project Report
+# Femi-Friendly: Project Analysis and Completion Report
 
-## 📖 1. Overview and Working Model
-**Femi-Friendly** is a comprehensive, AI-powered menstrual health and cycle tracking application built entirely with Flutter. Based on the premium "Flowly" Figma UI design system, the app utilizes a highly visual, animated, and user-friendly interface.
+Updated on: April 14, 2026
 
-### How it Works (Working Model)
-The app operates on a centralized architecture driven by the `provider` state management pattern. It heavily relies on synchronous local state holding user configurations and cycle logs, which dynamically alter the layout of the UI (e.g. Current Cycle Phase dictates Daily Recommendations).
-- **Authentication & User State (`AuthProvider`)**: Handles secure login, onboarding completion, BMI calculation, and app settings.
-- **Cycle Engine (`CycleProvider`)**: Calculates the user's cycle length predictions based on historical logs, identifies the current cycle day, and determines the current physiological phase (Menstrual, Follicular, Ovulation, Luteal) to customize user insights.
-- **AI/LLM Stub (`ChatProvider`)**: Serves as the middle layer for communicating with the backend. Currently holds dummy data for predictive insights but is architected to accept standard REST API calls (`/predict`, `/chat`).
+## 1. Current Project Status (Folder Analysis)
 
----
+This repository contains:
+- A Flutter app (`lib/`) with UI for auth, cycle tracking, pregnancy mode, AI insights, chat, profile, notifications, and water tracking.
+- A Python AI/ML layer (`ai_model/`) with preprocessing, model training, and prediction logic.
+- A Python API layer (`api/`) using FastAPI routes and service wrappers.
 
-## 🏗️ 2. Folder Structure
-The codebase follows a scalable Feature-first architectural pattern combined with Core/Shared utilities.
+What is already working:
+- Multi-screen Flutter app with Provider-based state management.
+- Cycle history calculations (predicted length, status, trends).
+- Pregnancy mode UI and trimester guidance content.
+- Backend prediction wrappers (`/predict/cycle`, `/predict/irregular`, `/predict/fertility`, `/recommend`).
+- Trained model artifact present (`ai_model/model.pkl`).
 
-```text
-lib/
-├── core/                       # Shared app-wide base definitions
-│   ├── constants/              # app_colors.dart, app_spacing.dart, app_strings.dart
-│   ├── navigation/             # Custom route transitions (app_page_route.dart)
-│   ├── theme/                  # Material theme configuration (app_theme.dart)
-│   └── utils/                  # Reusable helper functions (date formats, feedback UI)
-├── models/                     # Data models (chat_message.dart, cycle_entry.dart)
-├── providers/                  # Application State variables
-│   ├── auth_provider.dart      # User configuration & metrics
-│   ├── chat_provider.dart      # AI dialogue context memory
-│   └── cycle_provider.dart     # Menstrual math, calendars, logs
-├── routes/                     # Centralized named router map & deep links
-├── screens/                    # Feature/UI screens (1 module = 1 folder)
-│   ├── auth/                   # Login, Register, Onboarding presentations
-│   ├── chat/                   # AI Bot interactions & bubbles
-│   ├── cycle/                  # TableCalendar setup & menstrual logging bottom sheets
-│   ├── dashboard/              # Dynamic Home Dashboard UI
-│   ├── home/                   # Shell / Scaffold containing the Bottom Nav Bar
-│   ├── insights/               # Daily AI predictive cards
-│   ├── notification/           # Notification center & dismissible alerts
-│   ├── phase/                  # Dynamic hormone/phase education views
-│   ├── profile/                # User profile, settings toggles, logout
-│   ├── report/                 # FL Chart integration for health trend visualization
-│   ├── setup/                  # 5-Step setup funnel (Name, BMI, Cycle details)
-│   ├── splash/                 # Entrance animated loader
-│   └── water/                  # Hydration tracker with liquid ring progress
-├── widgets/                    # Global generic/reusable UI Components
-│   ├── card_widget.dart        # Unified shadow container
-│   ├── custom_button.dart      # Primary gradient CTA button
-│   ├── cycle_progress_bar.dart # Tracking UI components
-│   ├── skeleton_box.dart       # Shimmer loading placeholders
-│   └── typing_indicator.dart   # Chatbot typing animations
-└── main.dart                   # Entry point and MultiProvider setup
-```
+Main gaps found:
+- Frontend AI screens and chat are still local/simulated, not connected to backend API.
+- App state is mostly in-memory only (lost on restart).
+- Auth flow is demo-only and inconsistent (`register` vs `login` behavior).
+- `ReportScreen` exists but is not wired into route/tab navigation.
+- `requirements.txt` is mismatched (lists Flask while backend code is FastAPI).
+- README is still default template and does not document real setup/run flow.
 
 ---
 
-## 🛠️ 3. Features & Functions Implemented
-1. **Premium Thematic UI Framework**
-   - Exact implementation of the Figma gradient design system logic (`#E91E63`, `#FFF1F5` backgrounds).
-   - Heavy usage of rounded soft-UI components, DropShadow elevation, and animated transitions across all tabs.
-2. **Onboarding & User Setup Funnel**
-   - Configurable Profile Setup steps handling Health metrics (Age, Slider-based Height/Weight, Circle-dial cycle mapping).
-3. **Smart Dashboard Interface**
-   - Context-aware display calculating exact Period/Luteal phases.
-   - Intelligent suggestion system prescribing Activities, Food, and Mood changes based on the user's specific Cycle Day.
-4. **Calendar Tracking System**
-   - High-fidelity `table_calendar` integration showing distinct markers for period durations vs ovulation windows.
-   - Comprehensive Bottom Sheet logger (Flow level, Symptoms chips).
-5. **Interactive Data Views**
-   - **Water Tracker:** Interactive GridView map for recording daily glasses of water, integrated with dynamic circle progress.
-   - **Health Analytics:** Uses `fl_chart` to construct Bar Charts analyzing the gap trends between cycles and Mood tracking over 28-day sets. 
-6. **Chatbot Interface**
-   - Simulated conversational interface predicting responses, built with auto-scroll logic, action chip suggestions, and bouncing typing indicators.
+## 2. Functions to Add
+
+Below is the practical function backlog required to complete the project.
+
+### 2.1 Frontend (Flutter)
+
+1. API client and network layer
+- `Future<Map<String, dynamic>> predictAll(Map<String, dynamic> payload)`
+- `Future<Map<String, dynamic>> recommend(Map<String, dynamic> payload)`
+- `Future<Map<String, dynamic>> sendChatMessage(String message, List<Map<String, String>> history)`
+
+Suggested file: `lib/services/api_client.dart`
+
+2. Chat integration
+- `Future<void> sendMessageToApi(String text)` in `ChatProvider`
+- `Map<String, dynamic> _buildChatContext()` for request payload construction
+- `String _extractAssistantReply(Map<String, dynamic> response)` for robust parsing
+
+Suggested file update: `lib/providers/chat_provider.dart`
+
+3. Insights integration
+- `Future<void> fetchInsights()` to replace static insight values
+- `Map<String, dynamic> buildPredictionPayload()` from `AuthProvider + CycleProvider`
+- `void refreshInsights()` for pull-to-refresh / manual refresh
+
+Suggested files:
+- `lib/providers/insights_provider.dart` (new)
+- `lib/screens/insights/ai_insights_screen.dart` (consume provider)
+
+4. Persistence functions (app restart safety)
+- `Future<void> loadSession()` / `Future<void> saveSession()` in `AuthProvider`
+- `Future<void> loadCycleEntries()` / `Future<void> saveCycleEntries()` in `CycleProvider`
+- `Future<void> loadPregnancyState()` / `Future<void> savePregnancyState()` in `PregnancyProvider`
+- `Future<void> loadWaterState()` / `Future<void> saveWaterState()` for water tracking
+
+Suggested storage: `shared_preferences` initially, then migrate to `Hive/Isar` if needed.
+
+5. Auth flow completion
+- `Future<bool> loginWithCredentials(String email, String password)` (not demo-only)
+- `Future<bool> registerUser(...)` with stored user record or backend auth
+- `Future<void> logoutAndClearSession()`
+
+Current issue to fix: `register()` sets state, but `login()` only accepts hardcoded demo credentials.
+
+6. Cycle CRUD improvements
+- `void updateCycle(int index, CycleEntry entry)`
+- `void deleteCycle(int index)`
+- `bool validateCycleRange(DateTime start, DateTime end)`
+
+Suggested file update: `lib/providers/cycle_provider.dart`
+
+7. Routing and flow control
+- `Future<String> resolveInitialRoute()` to choose splash/landing/onboarding/login/home based on first run + auth state.
+- Add route for report screen: `AppRoutes.report`.
+
+Current issue to fix: splash directly navigates to login; onboarding/landing flow is bypassed.
+
+### 2.2 Backend (API + AI)
+
+1. API completeness and standardization
+- `GET /health` endpoint for uptime checks
+- `POST /predict` unified endpoint (already supported in model layer via `predict_all`, not exposed as API route)
+- `POST /chat` endpoint (if AI chat is expected from backend)
+
+Suggested files:
+- `api/routes.py`
+- `api/services.py`
+
+2. Input validation hardening
+- `validate_numeric_ranges(payload)` before inference
+- `normalize_categorical_inputs(payload)` for safe encoder handling
+
+Suggested file: `api/services.py`
+
+3. Prediction output consistency
+- Fix probability handling in `ai_model/predict.py`:
+  - currently `round(preg_prob, 4) if preg_prob else None` turns `0.0` into `None`
+  - should check `preg_prob is not None`
+
+4. Dependency correction
+- Replace Flask packages with FastAPI stack in `requirements.txt`:
+  - `fastapi`
+  - `uvicorn`
+  - `pydantic`
+
+### 2.3 Testing and Quality
+
+1. Flutter tests
+- Provider unit tests (`AuthProvider`, `CycleProvider`, `ChatProvider`)
+- Widget tests for route flow and form validation
+
+2. Backend tests
+- API contract tests for all endpoints
+- Model wrapper tests for expected output schema and edge cases
+
+3. Integration tests
+- End-to-end test from Flutter request payload to API response rendering in AI screens.
 
 ---
 
-## 📝 4. Technical Comments & Future Scope
-- **Environment Notes:** The app compiles perfectly via `flutter run -d chrome`. If running on Windows Desktop, Developer Mode must be enabled in Windows System Settings due to symlink requirements in the flutter toolchain.
-- **Performance:** Extensive use of `/// const` modifiers, optimized state rebuilding using `context.read/watch`, and careful AnimationController disposal prevents memory leaks.
-- **Next Steps:** 
-  - To utilize the AI feature, integrate an HTTP connection library (like `dio` or standard `http`) replacing the `await Future.delayed` blocks in `chat_provider.dart`.
-  - Wire up a persistence layer like `shared_preferences` or `hive` into the init constructors of the Providers so cycle data survives app restarts.
+## 3. Next Steps to Complete the Folder
+
+Priority plan:
+
+1. Fix blockers (Day 1)
+- Correct `requirements.txt` for FastAPI.
+- Add `/health` endpoint.
+- Validate backend starts cleanly.
+
+2. Connect frontend to backend (Days 1-2)
+- Create `lib/services/api_client.dart`.
+- Integrate real calls in `ChatProvider` and AI Insights.
+- Add loading/error/empty states for network failures.
+
+3. Make data persistent (Days 2-3)
+- Add provider load/save methods using `shared_preferences`.
+- Persist auth session, cycle entries, pregnancy mode, and water progress.
+
+4. Correct app flow and routing (Day 3)
+- Implement first-run route resolver.
+- Wire `Landing -> Onboarding -> Login` correctly.
+- Add report route entry and navigation access.
+
+5. Stabilize auth and profile setup (Day 3)
+- Align register/login behavior.
+- Persist actual registered profile.
+- Ensure profile setup name field is used when setup completes.
+
+6. Add tests and docs (Days 4-5)
+- Add core provider and API tests.
+- Replace default README with real setup commands for Flutter + backend.
+- Document API request/response schemas.
+
+---
+
+## 4. Definition of Complete
+
+Folder can be considered complete when:
+- AI Insights and Chat use live backend calls (no simulated-only logic).
+- User data survives app restart.
+- Auth flow is consistent for non-demo users.
+- All major screens/routes are reachable through intended flow.
+- Backend dependencies and endpoints are aligned with implementation.
+- Core tests pass and README documents exact run steps.
+
+---
+
+## 5. Tools and Software Required for Next Steps
+
+To continue development and run the full project end-to-end, you need:
+
+1. Core tools
+- Git
+- VS Code (or Android Studio)
+- PowerShell / terminal
+
+2. Flutter stack
+- Flutter SDK (stable channel, Dart included)
+- Android Studio (Android SDK + emulator) for Android testing
+- Chrome (for `flutter run -d chrome`)
+- Xcode (macOS only, if iOS build is needed)
+
+3. Python backend stack
+- Python 3.10+ recommended
+- `pip` and virtual environment tool (`venv`)
+- Required packages from `requirements.txt`:
+  - fastapi
+  - uvicorn
+  - pydantic
+  - numpy
+  - pandas
+  - scikit-learn
+  - joblib
+
+4. Optional but recommended
+- Postman or Insomnia (API testing)
+- Docker Desktop (for containerized deployment)
+- pytest (backend automated tests)
+
+5. Runtime configuration needed
+- Backend base URL for Flutter via Dart define:
+  - `--dart-define=API_BASE_URL=http://127.0.0.1:8000`
+- CORS is already enabled in backend for development.
