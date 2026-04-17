@@ -141,6 +141,16 @@ def recommend(data: Dict[str, Any]) -> Dict[str, Any]:
         raise RuntimeError(f"Recommendation generation failed: {exc}") from exc
 
 
+def recommend_products(data: Dict[str, Any]) -> Dict[str, Any]:
+    """Generate product recommendations from cycle and pregnancy context."""
+    try:
+        from api.product_recommendation_service import recommend_products as run_product_recommendation
+
+        return run_product_recommendation(data)
+    except Exception as exc:
+        raise RuntimeError(f"Product recommendation failed: {exc}") from exc
+
+
 def _chat_reply_from_prediction(query: str, prediction: Dict[str, Any]) -> Optional[str]:
     q = (query or "").lower()
     if not q:

@@ -101,6 +101,37 @@ class ApiService {
     }
   }
 
+  /// Get personalized external product recommendations
+  static Future<Map<String, dynamic>> getProductRecommendations(
+    Map<String, dynamic> data,
+  ) async {
+    try {
+      print('🔗 API Request: POST $baseUrl/recommend-products');
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/recommend-products'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode(data),
+      ).timeout(
+        const Duration(seconds: 30),
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception(
+          'Failed to get product recommendations: ${response.body}',
+        );
+      }
+    } catch (e) {
+      print('❌ Product Recommendations Error: $e');
+      rethrow;
+    }
+  }
+
   /// Check API health/connectivity
   static Future<bool> checkHealth() async {
     try {
@@ -237,6 +268,328 @@ class ApiService {
       }
     } catch (e) {
       print('❌ Health Alerts Error: $e');
+      rethrow;
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // AUTHENTICATION ENDPOINTS
+  // ─────────────────────────────────────────────────────────────────────────
+
+  static Future<Map<String, dynamic>> register({
+    required String email,
+    required String password,
+    required String name,
+    required int age,
+    required double weight,
+    required double height,
+  }) async {
+    try {
+      print('🔗 API Request: POST $baseUrl/auth/register');
+      
+      final response = await http.post(
+        Uri.parse('$baseUrl/auth/register'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'email': email,
+          'password': password,
+          'name': name,
+          'age': age,
+          'weight': weight,
+          'height': height,
+        }),
+      ).timeout(const Duration(seconds: 20));
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('Registration failed');
+      }
+    } catch (e) {
+      print('❌ Registration error: $e');
+      rethrow;
+    }
+  }
+
+  static Future<Map<String, dynamic>> login({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      print('🔗 API Request: POST $baseUrl/auth/login');
+      
+      final response = await http.post(
+        Uri.parse('$baseUrl/auth/login'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'email': email,
+          'password': password,
+        }),
+      ).timeout(const Duration(seconds: 20));
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('Login failed');
+      }
+    } catch (e) {
+      print('❌ Login error: $e');
+      rethrow;
+    }
+  }
+
+  static Future<Map<String, dynamic>> getProfile(String email) async {
+    try {
+      print('🔗 API Request: GET $baseUrl/auth/profile/$email');
+      
+      final response = await http.get(
+        Uri.parse('$baseUrl/auth/profile/$email'),
+        headers: {'Content-Type': 'application/json'},
+      ).timeout(const Duration(seconds: 15));
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('Failed to get profile');
+      }
+    } catch (e) {
+      print('❌ Get profile error: $e');
+      rethrow;
+    }
+  }
+
+  static Future<Map<String, dynamic>> updateProfile(
+    String email,
+    Map<String, dynamic> profileData,
+  ) async {
+    try {
+      print('🔗 API Request: PUT $baseUrl/auth/profile/$email');
+      
+      final response = await http.put(
+        Uri.parse('$baseUrl/auth/profile/$email'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(profileData),
+      ).timeout(const Duration(seconds: 20));
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('Profile update failed');
+      }
+    } catch (e) {
+      print('❌ Update profile error: $e');
+      rethrow;
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // CYCLE HISTORY ENDPOINTS
+  // ─────────────────────────────────────────────────────────────────────────
+
+  static Future<Map<String, dynamic>> addCycleEntry({
+    required String email,
+    required String date,
+    required int dayOfCycle,
+    required int flowIntensity,
+    List<String>? symptoms,
+    String? notes,
+  }) async {
+    try {
+      print('🔗 API Request: POST $baseUrl/cycle-history/add');
+      
+      final response = await http.post(
+        Uri.parse('$baseUrl/cycle-history/add'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'email': email,
+          'date': date,
+          'day_of_cycle': dayOfCycle,
+          'flow_intensity': flowIntensity,
+          'symptoms': symptoms ?? [],
+          'notes': notes ?? '',
+        }),
+      ).timeout(const Duration(seconds: 20));
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('Failed to add cycle entry');
+      }
+    } catch (e) {
+      print('❌ Add cycle entry error: $e');
+      rethrow;
+    }
+  }
+
+  static Future<Map<String, dynamic>> getCycleHistory(
+    String email, {
+    int limit = 12,
+    int offset = 0,
+  }) async {
+    try {
+      print('🔗 API Request: GET $baseUrl/cycle-history/history/$email');
+      
+      final response = await http.get(
+        Uri.parse(
+          '$baseUrl/cycle-history/history/$email?limit=$limit&offset=$offset',
+        ),
+        headers: {'Content-Type': 'application/json'},
+      ).timeout(const Duration(seconds: 15));
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('Failed to get cycle history');
+      }
+    } catch (e) {
+      print('❌ Get cycle history error: $e');
+      rethrow;
+    }
+  }
+
+  static Future<Map<String, dynamic>> getCycleStats(String email) async {
+    try {
+      print('🔗 API Request: GET $baseUrl/cycle-history/stats/$email');
+      
+      final response = await http.get(
+        Uri.parse('$baseUrl/cycle-history/stats/$email'),
+        headers: {'Content-Type': 'application/json'},
+      ).timeout(const Duration(seconds: 15));
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('Failed to get cycle stats');
+      }
+    } catch (e) {
+      print('❌ Get cycle stats error: $e');
+      rethrow;
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // ADVANCED ENDPOINTS (v2.0)
+  // ─────────────────────────────────────────────────────────────────────────
+
+  static Future<Map<String, dynamic>> getFertilityInsights(
+    Map<String, dynamic> data,
+  ) async {
+    try {
+      print('🔗 API Request: POST $baseUrl/fertility-insights');
+      
+      final response = await http.post(
+        Uri.parse('$baseUrl/fertility-insights'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(data),
+      ).timeout(const Duration(seconds: 30));
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('Failed to get fertility insights');
+      }
+    } catch (e) {
+      print('❌ Fertility insights error: $e');
+      rethrow;
+    }
+  }
+
+  static Future<Map<String, dynamic>> getPregnancyInsights(
+    Map<String, dynamic> data,
+  ) async {
+    try {
+      print('🔗 API Request: POST $baseUrl/pregnancy-insights');
+      
+      final response = await http.post(
+        Uri.parse('$baseUrl/pregnancy-insights'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(data),
+      ).timeout(const Duration(seconds: 30));
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('Failed to get pregnancy insights');
+      }
+    } catch (e) {
+      print('❌ Pregnancy insights error: $e');
+      rethrow;
+    }
+  }
+
+  static Future<Map<String, dynamic>> getMentalHealthStatus(
+    Map<String, dynamic> data,
+  ) async {
+    try {
+      print('🔗 API Request: POST $baseUrl/mental-health');
+      
+      final response = await http.post(
+        Uri.parse('$baseUrl/mental-health'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(data),
+      ).timeout(const Duration(seconds: 30));
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('Failed to get mental health status');
+      }
+    } catch (e) {
+      print('❌ Mental health error: $e');
+      rethrow;
+    }
+  }
+
+  static Future<Map<String, dynamic>> getNotifications(
+    Map<String, dynamic> data,
+  ) async {
+    try {
+      print('🔗 API Request: POST $baseUrl/notifications');
+      
+      final response = await http.post(
+        Uri.parse('$baseUrl/notifications'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(data),
+      ).timeout(const Duration(seconds: 20));
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('Failed to get notifications');
+      }
+    } catch (e) {
+      print('❌ Notifications error: $e');
+      rethrow;
+    }
+  }
+
+  static Future<Map<String, dynamic>> sendChatMessage({
+    required String message,
+    List<Map<String, String>>? history,
+    Map<String, dynamic>? profile,
+    Map<String, dynamic>? cycle,
+  }) async {
+    try {
+      print('🔗 API Request: POST $baseUrl/chat');
+      
+      final response = await http.post(
+        Uri.parse('$baseUrl/chat'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'message': message,
+          'history': history ?? [],
+          'profile': profile ?? {},
+          'cycle': cycle ?? {},
+        }),
+      ).timeout(const Duration(seconds: 20));
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('Chat failed');
+      }
+    } catch (e) {
+      print('❌ Chat error: $e');
       rethrow;
     }
   }

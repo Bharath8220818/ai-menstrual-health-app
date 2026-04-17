@@ -46,6 +46,12 @@ class ApiClient {
     return _post('/recommend', payload);
   }
 
+  Future<Map<String, dynamic>> recommendProducts(
+    Map<String, dynamic> payload,
+  ) async {
+    return _post('/recommend-products', payload);
+  }
+
   Future<Map<String, dynamic>> sendChatMessage({
     required String message,
     List<Map<String, String>> history = const [],

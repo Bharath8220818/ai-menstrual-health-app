@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 import 'package:femi_friendly/core/theme/app_scroll_behavior.dart';
 import 'package:femi_friendly/core/theme/app_theme.dart';
@@ -11,8 +12,20 @@ import 'package:femi_friendly/providers/pregnancy_provider.dart';
 import 'package:femi_friendly/providers/ai_provider.dart';
 import 'package:femi_friendly/routes/routes.dart';
 import 'package:femi_friendly/services/api_client.dart';
+import 'package:femi_friendly/services/notification_service.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  try {
+    await Firebase.initializeApp();
+  } catch (error) {
+    debugPrint('Firebase init skipped: $error');
+  }
+  
+  // Initialize notifications
+  await NotificationService().initNotifications();
+  
   runApp(const FemiFriendlyApp());
 }
 

@@ -1,17 +1,32 @@
 # femi_friendly
 
-A new Flutter project.
+A Flutter application that provides menstrual-health tracking, AI-driven insights, and recommendations.
+
+## Documentation
+
+- Full consolidated documentation (master): [DOCUMENTATION_MASTER.md](DOCUMENTATION_MASTER.md)
+- Documentation index: [DOCUMENTATION_INDEX.md](DOCUMENTATION_INDEX.md)
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+1. Start backend
 
-A few resources to get you started if this is your first Flutter project:
+```bash
+venv\\Scripts\\activate
+python -m uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
+```
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+2. Start the Flutter app
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```bash
+cd d:/project/ai-menstrual-health-app
+flutter pub get
+flutter run
+```
+
+## Quick Links
+
+- API docs: `http://localhost:8000/docs`
+- Health check: `http://localhost:8000/health`
+
+If you prefer, open the consolidated docs for full setup, testing, and integration instructions: [DOCUMENTATION_MASTER.md](DOCUMENTATION_MASTER.md)

@@ -158,21 +158,13 @@ class _SplashScreenState extends State<SplashScreen>
                             ],
                           ),
                           child: Center(
-                            child: SizedBox(
+                            child: const SizedBox(
                               width: 58,
                               height: 58,
-                              child: ClipOval(
-                                child: Image(
-                                  image: const AssetImage('assets/images/logo.png'),
-                                  fit: BoxFit.contain,
-                                  errorBuilder: (context, error, stack) {
-                                    return const Icon(
-                                      Icons.favorite_rounded,
-                                      color: Colors.white,
-                                      size: 58,
-                                    );
-                                  },
-                                ),
+                              child: Icon(
+                                Icons.favorite_rounded,
+                                color: Colors.white,
+                                size: 58,
                               ),
                             ),
                           ),
@@ -236,6 +228,7 @@ class _LoadingDotsState extends State<_LoadingDots>
     with TickerProviderStateMixin {
   final List<AnimationController> _controllers = [];
   final List<Animation<double>> _animations = [];
+  bool _isDisposed = false;
 
   @override
   void initState() {
@@ -255,14 +248,16 @@ class _LoadingDotsState extends State<_LoadingDots>
   }
 
   Future<void> _startLoop() async {
-    while (mounted) {
+    while (mounted && !_isDisposed) {
       for (var i = 0; i < 3; i++) {
-        if (!mounted) return;
+        if (!mounted || _isDisposed) return;
         _controllers[i].forward();
         await Future<void>.delayed(const Duration(milliseconds: 150));
       }
       await Future<void>.delayed(const Duration(milliseconds: 400));
+      if (!mounted || _isDisposed) return;
       for (final ctrl in _controllers) {
+        if (_isDisposed) return;
         ctrl.reverse();
       }
       await Future<void>.delayed(const Duration(milliseconds: 500));
@@ -271,6 +266,7 @@ class _LoadingDotsState extends State<_LoadingDots>
 
   @override
   void dispose() {
+    _isDisposed = true;
     for (final ctrl in _controllers) {
       ctrl.dispose();
     }

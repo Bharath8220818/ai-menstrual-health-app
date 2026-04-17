@@ -649,11 +649,11 @@ class _QuickActionsGrid extends StatelessWidget {
         onPressed: () => Navigator.pushNamed(context, AppRoutes.waterTracker),
       ),
       (
-        label: 'View Cycle',
-        icon: Icons.calendar_month_rounded,
-        emoji: '📅',
-        gradient: const LinearGradient(colors: [Color(0xFF9C27B0), Color(0xFFAB47BC)]),
-        onPressed: () => onTap?.call(1),
+        label: 'Shop Picks',
+        icon: Icons.shopping_bag_rounded,
+        emoji: '🛍️',
+        gradient: const LinearGradient(colors: [Color(0xFF5D4037), Color(0xFF8D6E63)]),
+        onPressed: () => Navigator.pushNamed(context, AppRoutes.productRecommendations),
       ),
       (
         label: 'Pregnancy',

@@ -1,5 +1,11 @@
 from fastapi import APIRouter, HTTPException
-from api.schemas import BasePredict, RecommendInput, ChatInput
+from api.schemas import (
+    BasePredict,
+    RecommendInput,
+    RecommendProductsInput,
+    RecommendProductsResponse,
+    ChatInput,
+)
 from api import services
 
 router = APIRouter()
@@ -11,7 +17,7 @@ async def get_health():
         "status": "ok",
         "service": "menstrual-health-ai-api",
         "version": "2.0.0",
-        "features": ["cycle-tracking", "fertility", "pregnancy", "nutrition", "alerts", "notifications", "mental-health"]
+        "features": ["cycle-tracking", "fertility", "pregnancy", "nutrition", "alerts", "notifications", "mental-health", "product-recommendations"]
     }
 
 
@@ -51,6 +57,14 @@ async def post_predict(payload: BasePredict):
 async def post_recommend(payload: RecommendInput):
     try:
         return services.recommend(payload.dict(exclude_none=True))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
+@router.post("/recommend-products", response_model=RecommendProductsResponse)
+async def post_recommend_products(payload: RecommendProductsInput):
+    try:
+        return services.recommend_products(payload.dict(exclude_none=True))
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
 

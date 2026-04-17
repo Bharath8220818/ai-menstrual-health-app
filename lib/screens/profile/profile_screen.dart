@@ -380,7 +380,7 @@ class _ProfileHeader extends StatelessWidget {
                     Expanded(
                       child: TextField(
                         controller: weightCtrl,
-                        keyboardType: TextInputType.numberWithOptions(decimal: true),
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         decoration: const InputDecoration(
                           labelText: 'Weight (kg)',
                           prefixIcon: Icon(Icons.monitor_weight_rounded, color: AppColors.primary),
@@ -391,7 +391,7 @@ class _ProfileHeader extends StatelessWidget {
                     Expanded(
                       child: TextField(
                         controller: heightCtrl,
-                        keyboardType: TextInputType.numberWithOptions(decimal: true),
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         decoration: const InputDecoration(
                           labelText: 'Height (cm)',
                           prefixIcon: Icon(Icons.height, color: AppColors.primary),

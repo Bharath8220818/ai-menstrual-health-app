@@ -25,12 +25,17 @@ class LandingScreen extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    ClipOval(
-                      child: Image.asset(
-                        'assets/images/logo.png',
-                        width: 200,
-                        height: 200,
-                        fit: BoxFit.contain,
+                    Container(
+                      width: 200,
+                      height: 200,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: const Color(0xFFE91E63).withValues(alpha: 0.1),
+                      ),
+                      child: const Icon(
+                        Icons.favorite_rounded,
+                        size: 120,
+                        color: Color(0xFFE91E63),
                       ),
                     ),
                     const SizedBox(height: 24),

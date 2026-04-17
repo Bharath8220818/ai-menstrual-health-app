@@ -61,6 +61,14 @@
 	<string>Femi-Friendly needs access to your photo library to choose profile photos.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Femi-Friendly may save photos to your photo library.</string>
+	
+	<!-- Location permissions for Google Maps -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Femi-Friendly needs your location to find nearby hospitals, pharmacies, and health services.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Femi-Friendly needs your location to find nearby hospitals, pharmacies, and health services.</string>
+	<key>NSLocationUsageDescription</key>
+	<string>Femi-Friendly needs your location to show nearby medical facilities.</string>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

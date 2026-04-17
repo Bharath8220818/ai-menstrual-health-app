@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
-import 'package:femi_friendly/core/constants/app_colors.dart';
 import 'package:femi_friendly/core/constants/app_spacing.dart';
 import 'package:femi_friendly/providers/cycle_provider.dart';
 

@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional, List
 
 
@@ -40,6 +40,27 @@ class BasePredict(BaseModel):
 
 class RecommendInput(BasePredict):
     pass
+
+
+class RecommendProductsInput(BaseModel):
+    cycle_phase: str = Field(..., description="Current cycle phase")
+    flow_level: str | int | float = Field(..., description="Flow level (light/medium/heavy or 0-5)")
+    pain_level: str | int | float = Field(..., description="Pain level (low/medium/high or 0-10)")
+    pregnancy_status: bool = Field(default=False, description="Whether user is pregnant")
+    max_results: int = Field(default=5, ge=1, le=10)
+
+
+class RecommendedProductItem(BaseModel):
+    name: str
+    price: str
+    link: str
+    image: str
+
+
+class RecommendProductsResponse(BaseModel):
+    category: str
+    products: List[RecommendedProductItem]
+    disclaimer: str
 
 
 class ChatHistoryItem(BaseModel):

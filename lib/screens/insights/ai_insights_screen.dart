@@ -7,6 +7,7 @@ import 'package:femi_friendly/providers/auth_provider.dart';
 import 'package:femi_friendly/providers/cycle_provider.dart';
 import 'package:femi_friendly/providers/insights_provider.dart';
 import 'package:femi_friendly/providers/pregnancy_provider.dart';
+import 'package:femi_friendly/routes/routes.dart';
 
 /// Comprehensive AI Insights Screen with Fertility window integration
 class AIInsightsScreen extends StatefulWidget {
@@ -171,6 +172,13 @@ class _AIInsightsScreenState extends State<AIInsightsScreen>
                     opacity: _fadeAnim,
                     child: Column(
                       children: [
+                        _ProductRecommendationCta(
+                          onTap: () => Navigator.pushNamed(
+                            context,
+                            AppRoutes.productRecommendations,
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.md),
                         // Fertility Card
                         _FertilityInsightCard(cycle: cycle),
                         const SizedBox(height: AppSpacing.md),
@@ -451,6 +459,79 @@ class _StatChip extends StatelessWidget {
               fontSize: 11,
               fontWeight: FontWeight.w600,
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProductRecommendationCta extends StatelessWidget {
+  const _ProductRecommendationCta({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF5D4037), Color(0xFF8D6E63)],
+        ),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF5D4037).withValues(alpha: 0.25),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.22),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.shopping_bag_rounded,
+              color: Colors.white,
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 10),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Recommended Products',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                SizedBox(height: 3),
+                Text(
+                  'Get personalized product picks with direct external buy links.',
+                  style: TextStyle(color: Colors.white, fontSize: 12, height: 1.4),
+                ),
+              ],
+            ),
+          ),
+          TextButton(
+            onPressed: onTap,
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: const Color(0xFF5D4037),
+            ),
+            child: const Text('Open'),
           ),
         ],
       ),

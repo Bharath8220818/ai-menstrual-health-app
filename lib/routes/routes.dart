@@ -12,6 +12,12 @@ import 'package:femi_friendly/screens/splash/splash_screen.dart';
 import 'package:femi_friendly/screens/landing/landing_screen.dart';
 import 'package:femi_friendly/screens/water/water_tracker_screen.dart';
 import 'package:femi_friendly/screens/debug/profile_test_screen.dart';
+import 'package:femi_friendly/screens/nutrition/nutrition_planner_screen.dart';
+import 'package:femi_friendly/screens/fertility/fertility_insights_screen.dart';
+import 'package:femi_friendly/screens/health/mental_health_screen.dart';
+import 'package:femi_friendly/screens/map_screen.dart';
+import 'package:femi_friendly/screens/recommendations/product_recommendation_screen.dart';
+import 'package:femi_friendly/screens/animated_splash_screen.dart';
 
 class AppRoutes {
   AppRoutes._();
@@ -38,6 +44,12 @@ class AppRoutes {
   static const String notifications = '/notifications';
   static const String waterTracker = '/water-tracker';
   static const String phaseDetail = '/phase-detail';
+  static const String nutritionPlanner = '/nutrition-planner';
+  static const String fertilityInsights = '/fertility-insights';
+  static const String mentalHealth = '/mental-health';
+  static const String mapScreen = '/map';
+  static const String productRecommendations = '/product-recommendations';
+  static const String animatedSplash = '/animated-splash';
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     late final Widget page;
@@ -80,6 +92,18 @@ class AppRoutes {
             ? settings.arguments! as CyclePhase
             : CyclePhase.menstrual;
         page = PhaseDetailScreen(phase: phase);
+      case nutritionPlanner:
+        page = const NutritionPlannerScreen();
+      case fertilityInsights:
+        page = const FertilityInsightsScreen();
+      case mentalHealth:
+        page = const MentalHealthScreen();
+      case mapScreen:
+        page = const MapScreen();
+      case productRecommendations:
+        page = const ProductRecommendationScreen();
+      case animatedSplash:
+        page = const AnimatedSplashScreen();
       case debugProfileTest:
         page = const ProfileTestScreen();
       default:
