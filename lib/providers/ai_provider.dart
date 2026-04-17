@@ -39,7 +39,7 @@ class AIProvider extends ChangeNotifier {
       // Set loading state
       _isLoading = true;
       notifyListeners();
-      print('📤 Fetching prediction with data: $inputData');
+      debugPrint('📤 Fetching prediction with data: $inputData');
 
       // Validate input
       if (!_validateInput(inputData)) {
@@ -54,9 +54,9 @@ class AIProvider extends ChangeNotifier {
       _hasError = false;
       _errorMessage = null;
 
-      print('✅ Prediction fetched successfully: $result');
+      debugPrint('✅ Prediction fetched successfully: $result');
     } catch (e) {
-      print('❌ Prediction error: $e');
+      debugPrint('❌ Prediction error: $e');
       _hasError = true;
       _errorMessage = e.toString();
       _predictionResult = null;
@@ -74,15 +74,15 @@ class AIProvider extends ChangeNotifier {
       _isLoading = true;
       notifyListeners();
 
-      print('📤 Fetching recommendations with data: $inputData');
+      debugPrint('📤 Fetching recommendations with data: $inputData');
 
       final result = await ApiService.getRecommendations(inputData);
       _predictionResult = result;
       _hasError = false;
 
-      print('✅ Recommendations fetched successfully: $result');
+      debugPrint('✅ Recommendations fetched successfully: $result');
     } catch (e) {
-      print('❌ Recommendations error: $e');
+      debugPrint('❌ Recommendations error: $e');
       _hasError = true;
       _errorMessage = e.toString();
       _predictionResult = null;
@@ -100,15 +100,15 @@ class AIProvider extends ChangeNotifier {
       _isLoading = true;
       notifyListeners();
 
-      print('📤 Fetching daily recommendations with data: $inputData');
+      debugPrint('📤 Fetching daily recommendations with data: $inputData');
 
       final result = await ApiService.getDailyRecommendations(inputData);
       _predictionResult = result;
       _hasError = false;
 
-      print('✅ Daily recommendations fetched successfully');
+      debugPrint('✅ Daily recommendations fetched successfully');
     } catch (e) {
-      print('❌ Daily recommendations error: $e');
+      debugPrint('❌ Daily recommendations error: $e');
       _hasError = true;
       _errorMessage = e.toString();
       _predictionResult = null;
@@ -130,9 +130,9 @@ class AIProvider extends ChangeNotifier {
       _predictionResult = result;
       _hasError = false;
 
-      print('✅ Cycle intelligence fetched successfully');
+      debugPrint('✅ Cycle intelligence fetched successfully');
     } catch (e) {
-      print('❌ Cycle intelligence error: $e');
+      debugPrint('❌ Cycle intelligence error: $e');
       _hasError = true;
       _errorMessage = e.toString();
       _predictionResult = null;
@@ -154,9 +154,9 @@ class AIProvider extends ChangeNotifier {
       _predictionResult = result;
       _hasError = false;
 
-      print('✅ Nutrition plan fetched successfully');
+      debugPrint('✅ Nutrition plan fetched successfully');
     } catch (e) {
-      print('❌ Nutrition plan error: $e');
+      debugPrint('❌ Nutrition plan error: $e');
       _hasError = true;
       _errorMessage = e.toString();
       _predictionResult = null;
@@ -178,9 +178,9 @@ class AIProvider extends ChangeNotifier {
       _predictionResult = result;
       _hasError = false;
 
-      print('✅ Health alerts fetched successfully');
+      debugPrint('✅ Health alerts fetched successfully');
     } catch (e) {
-      print('❌ Health alerts error: $e');
+      debugPrint('❌ Health alerts error: $e');
       _hasError = true;
       _errorMessage = e.toString();
       _predictionResult = null;
@@ -219,7 +219,7 @@ class AIProvider extends ChangeNotifier {
     
     for (final field in requiredFields) {
       if (!data.containsKey(field) || data[field] == null) {
-        print('❌ Missing required field: $field');
+        debugPrint('❌ Missing required field: $field');
         return false;
       }
     }
@@ -231,23 +231,23 @@ class AIProvider extends ChangeNotifier {
       final cycleLength = data['cycle_length'];
 
       if (age is! int || age < 0 || age > 120) {
-        print('❌ Invalid age value');
+        debugPrint('❌ Invalid age value');
         return false;
       }
 
       if (bmi is! num || bmi < 10 || bmi > 60) {
-        print('❌ Invalid BMI value');
+        debugPrint('❌ Invalid BMI value');
         return false;
       }
 
       if (cycleLength is! int || cycleLength < 15 || cycleLength > 60) {
-        print('❌ Invalid cycle length value');
+        debugPrint('❌ Invalid cycle length value');
         return false;
       }
 
       return true;
     } catch (e) {
-      print('❌ Validation error: $e');
+      debugPrint('❌ Validation error: $e');
       return false;
     }
   }
@@ -302,3 +302,4 @@ class AIProvider extends ChangeNotifier {
     await requestFunction(inputData);
   }
 }
+

@@ -43,3 +43,13 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# ── SECRETS — never commit these ──────────────────────────────────────────────
+.env
+*.env
+firebase-adminsdk*.json
+*-adminsdk-*.json
+*service_account*.json
+google-services-backup.json
+GoogleService-Info-backup.plist
+local.properties

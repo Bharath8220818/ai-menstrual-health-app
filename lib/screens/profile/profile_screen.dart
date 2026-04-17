@@ -289,6 +289,8 @@ class _ProfileHeader extends StatelessWidget {
                                         leading: const Icon(Icons.camera_alt),
                                         title: const Text('Take Photo'),
                                         onTap: () async {
+                                          final messenger = ScaffoldMessenger.of(context);
+                                          final nav = Navigator.of(sheetCtx);
                                           final picker = ImagePicker();
                                           final XFile? file = await picker.pickImage(
                                             source: ImageSource.camera,
@@ -301,18 +303,20 @@ class _ProfileHeader extends StatelessWidget {
                                             if (p.endsWith('.png') || p.endsWith('.jpg') || p.endsWith('.jpeg')) {
                                               setState(() => pickedAvatar = file.path);
                                             } else {
-                                              ScaffoldMessenger.of(context).showSnackBar(
+                                              messenger.showSnackBar(
                                                 const SnackBar(content: Text('Please select a PNG or JPG image.')),
                                               );
                                             }
                                           }
-                                          Navigator.pop(sheetCtx);
+                                          nav.pop();
                                         },
                                       ),
                                       ListTile(
                                         leading: const Icon(Icons.photo_library_outlined),
                                         title: const Text('Choose From Gallery'),
                                         onTap: () async {
+                                          final messenger = ScaffoldMessenger.of(context);
+                                          final nav = Navigator.of(sheetCtx);
                                           final picker = ImagePicker();
                                           final XFile? file = await picker.pickImage(
                                             source: ImageSource.gallery,
@@ -325,12 +329,12 @@ class _ProfileHeader extends StatelessWidget {
                                             if (p.endsWith('.png') || p.endsWith('.jpg') || p.endsWith('.jpeg')) {
                                               setState(() => pickedAvatar = file.path);
                                             } else {
-                                              ScaffoldMessenger.of(context).showSnackBar(
+                                              messenger.showSnackBar(
                                                 const SnackBar(content: Text('Please select a PNG or JPG image.')),
                                               );
                                             }
                                           }
-                                          Navigator.pop(sheetCtx);
+                                          nav.pop();
                                         },
                                       ),
                                                   if (pickedAvatar != null)
@@ -816,3 +820,4 @@ class _SettingsTile extends StatelessWidget {
     );
   }
 }
+

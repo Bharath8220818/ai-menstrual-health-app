@@ -17,6 +17,7 @@ import 'package:femi_friendly/screens/fertility/fertility_insights_screen.dart';
 import 'package:femi_friendly/screens/health/mental_health_screen.dart';
 import 'package:femi_friendly/screens/map_screen.dart';
 import 'package:femi_friendly/screens/recommendations/product_recommendation_screen.dart';
+import 'package:femi_friendly/screens/shop/product_screen.dart';
 import 'package:femi_friendly/screens/animated_splash_screen.dart';
 
 class AppRoutes {
@@ -50,6 +51,7 @@ class AppRoutes {
   static const String mentalHealth = '/mental-health';
   static const String mapScreen = '/map';
   static const String productRecommendations = '/product-recommendations';
+  static const String productShop = '/shop';
   static const String animatedSplash = '/animated-splash';
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
@@ -105,6 +107,8 @@ class AppRoutes {
         page = const MapScreen();
       case productRecommendations:
         page = const ProductRecommendationScreen();
+      case productShop:
+        page = const ProductScreen();
       case animatedSplash:
         page = const AnimatedSplashScreen();
       case debugProfileTest:

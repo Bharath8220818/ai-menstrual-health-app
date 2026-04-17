@@ -157,8 +157,8 @@ class _SplashScreenState extends State<SplashScreen>
                               ),
                             ],
                           ),
-                          child: Center(
-                            child: const SizedBox(
+                          child: const Center(
+                            child: SizedBox(
                               width: 58,
                               height: 58,
                               child: Icon(
@@ -303,3 +303,4 @@ class _LoadingDotsState extends State<_LoadingDots>
     );
   }
 }
+

@@ -3,6 +3,7 @@ plugins {
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -29,6 +30,8 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        manifestPlaceholders["MAPS_API_KEY"] =
+            (project.findProperty("MAPS_API_KEY") as String?) ?: ""
     }
 
     buildTypes {
@@ -46,4 +49,13 @@ flutter {
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
+
+    // Firebase BoM — manages all Firebase SDK versions automatically
+    implementation(platform("com.google.firebase:firebase-bom:34.0.0"))
+
+    // Firebase Cloud Messaging (push notifications)
+    implementation("com.google.firebase:firebase-messaging")
+
+    // Firebase Analytics
+    implementation("com.google.firebase:firebase-analytics")
 }

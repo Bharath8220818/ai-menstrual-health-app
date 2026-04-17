@@ -59,11 +59,11 @@ class PcodSupportScreen extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: AppSpacing.md),
-                _SectionCard(
+                const _SectionCard(
                   title: 'When To See A Doctor',
                   icon: Icons.local_hospital_outlined,
-                  color: const Color(0xFF1565C0),
-                  items: const [
+                  color: Color(0xFF1565C0),
+                  items: [
                     'Periods missing for 3 months or more',
                     'Bleeding is unusually heavy or painful',
                     'Symptoms keep increasing across multiple cycles',
@@ -383,3 +383,4 @@ class _SectionCard extends StatelessWidget {
     );
   }
 }
+

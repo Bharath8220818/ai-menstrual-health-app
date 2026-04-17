@@ -9,13 +9,13 @@ class AnimatedCard extends StatefulWidget {
   final Duration animationDuration;
 
   const AnimatedCard({
-    Key? key,
+    super.key,
     required this.child,
     this.height,
     this.width,
     this.backgroundColor = Colors.white,
     this.animationDuration = const Duration(milliseconds: 600),
-  }) : super(key: key);
+  });
 
   @override
   State<AnimatedCard> createState() => _AnimatedCardState();
@@ -84,11 +84,11 @@ class AnimatedListItem extends StatefulWidget {
   final Duration delay;
 
   const AnimatedListItem({
-    Key? key,
+    super.key,
     required this.child,
     required this.index,
     this.delay = const Duration(milliseconds: 100),
-  }) : super(key: key);
+  });
 
   @override
   State<AnimatedListItem> createState() => _AnimatedListItemState();
@@ -157,13 +157,13 @@ class AnimatedProgressBar extends StatefulWidget {
   final Duration animationDuration;
 
   const AnimatedProgressBar({
-    Key? key,
+    super.key,
     required this.value,
     this.height = 8.0,
     this.backgroundColor = const Color(0xFFE0E0E0),
     this.valueColor = const Color(0xFFE91E63),
     this.animationDuration = const Duration(milliseconds: 800),
-  }) : super(key: key);
+  });
 
   @override
   State<AnimatedProgressBar> createState() => _AnimatedProgressBarState();
@@ -236,10 +236,10 @@ class LottieLoadingDialog extends StatelessWidget {
   final String animationPath;
 
   const LottieLoadingDialog({
-    Key? key,
+    super.key,
     this.message = 'Loading...',
     this.animationPath = 'assets/animations/loading.json',
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -286,11 +286,11 @@ class FadeInAnimation extends StatefulWidget {
   final Curve curve;
 
   const FadeInAnimation({
-    Key? key,
+    super.key,
     required this.child,
     this.duration = const Duration(milliseconds: 500),
     this.curve = Curves.easeIn,
-  }) : super(key: key);
+  });
 
   @override
   State<FadeInAnimation> createState() => _FadeInAnimationState();
@@ -328,10 +328,10 @@ class ScaleAndFadeAnimation extends StatefulWidget {
   final Duration duration;
 
   const ScaleAndFadeAnimation({
-    Key? key,
+    super.key,
     required this.child,
     this.duration = const Duration(milliseconds: 600),
-  }) : super(key: key);
+  });
 
   @override
   State<ScaleAndFadeAnimation> createState() => _ScaleAndFadeAnimationState();
@@ -384,12 +384,12 @@ class SlideInAnimation extends StatefulWidget {
   final Offset end;
 
   const SlideInAnimation({
-    Key? key,
+    super.key,
     required this.child,
     this.duration = const Duration(milliseconds: 600),
     this.begin = const Offset(-1, 0),
     this.end = Offset.zero,
-  }) : super(key: key);
+  });
 
   @override
   State<SlideInAnimation> createState() => _SlideInAnimationState();

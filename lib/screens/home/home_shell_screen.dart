@@ -428,3 +428,4 @@ class _AIInsightsAndChatScreenState extends State<AIInsightsAndChatScreen>
     );
   }
 }
+

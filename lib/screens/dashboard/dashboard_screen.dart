@@ -806,18 +806,18 @@ class _QuickActionsGrid extends StatelessWidget {
         onPressed: () => Navigator.pushNamed(context, AppRoutes.waterTracker),
       ),
       (
-        label: 'Shop Picks',
+        label: 'Shop',
         icon: Icons.shopping_bag_rounded,
         emoji: '🛍️',
-        gradient: const LinearGradient(colors: [Color(0xFF5D4037), Color(0xFF8D6E63)]),
-        onPressed: () => Navigator.pushNamed(context, AppRoutes.productRecommendations),
+        gradient: const LinearGradient(colors: [Color(0xFFAD1457), Color(0xFFE91E63)]),
+        onPressed: () => Navigator.pushNamed(context, AppRoutes.productShop),
       ),
       (
-        label: 'Pregnancy',
-        icon: Icons.favorite_rounded,
-        emoji: '🤰',
-        gradient: const LinearGradient(colors: [Color(0xFFAD1457), Color(0xFFE91E63)]),
-        onPressed: () => onTap?.call(2),
+        label: 'Nearby',
+        icon: Icons.location_on_rounded,
+        emoji: '🗺️',
+        gradient: const LinearGradient(colors: [Color(0xFF2E7D32), Color(0xFF43A047)]),
+        onPressed: () => Navigator.pushNamed(context, AppRoutes.mapScreen),
       ),
       (
         label: 'AI Chat',
@@ -827,6 +827,7 @@ class _QuickActionsGrid extends StatelessWidget {
         onPressed: () => onTap?.call(4),
       ),
     ];
+
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1100,3 +1101,4 @@ class _PregnancyBanner extends StatelessWidget {
     );
   }
 }
+

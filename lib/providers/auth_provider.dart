@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:femi_friendly/core/constants/app_strings.dart';
+import 'package:femi_friendly/services/api_service.dart';
+import 'package:femi_friendly/services/notification_service.dart';
 
 class AuthProvider extends ChangeNotifier {
   bool _isLoggedIn = false;
@@ -126,6 +128,7 @@ class AuthProvider extends ChangeNotifier {
       _name = 'Admin User';
       _email = AppStrings.demoEmail;
       _hasCompletedSetup = true; // already set up in demo
+      await _syncFcmTokenForUser(_email);
     }
 
     _isLoading = false;
@@ -142,7 +145,25 @@ class AuthProvider extends ChangeNotifier {
     _email = email.trim();
     _isLoggedIn = true;
     _hasCompletedSetup = false;
+    _syncFcmTokenForUser(_email);
     notifyListeners();
+  }
+
+  Future<void> _syncFcmTokenForUser(String email) async {
+    if (email.trim().isEmpty) return;
+    try {
+      final token = await NotificationService().getFCMToken();
+      if (token == null || token.isEmpty) return;
+
+      await ApiService.registerDeviceToken(
+        email: email,
+        token: token,
+        platform: 'android',
+      );
+      debugPrint('✅ FCM token synced for $email');
+    } catch (e) {
+      debugPrint('FCM token sync skipped: $e');
+    }
   }
 
   void completeSetup({
@@ -196,3 +217,4 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 }
+

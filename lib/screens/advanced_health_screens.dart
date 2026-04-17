@@ -279,8 +279,6 @@ class NutritionPlannerScreen extends StatefulWidget {
 }
 
 class _NutritionPlannerScreenState extends State<NutritionPlannerScreen> {
-  int _selectedTabIndex = 0;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -303,15 +301,12 @@ class _NutritionPlannerScreenState extends State<NutritionPlannerScreen> {
               length: 3,
               child: Column(
                 children: [
-                  TabBar(
-                    tabs: const [
+                  const TabBar(
+                    tabs: [
                       Tab(text: '🌅 Breakfast'),
                       Tab(text: '🍽️ Lunch'),
                       Tab(text: '🌙 Dinner'),
                     ],
-                    onTap: (index) {
-                      setState(() => _selectedTabIndex = index);
-                    },
                   ),
                   const SizedBox(height: 16),
                   SizedBox(
@@ -1242,3 +1237,4 @@ class _DailyHealthCenterScreenState extends State<DailyHealthCenterScreen> {
     );
   }
 }
+

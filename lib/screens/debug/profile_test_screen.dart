@@ -20,6 +20,7 @@ class _ProfileTestScreenState extends State<ProfileTestScreen> {
   Future<void> _pick(ImageSource source) async {
     setState(() => _isPicking = true);
     try {
+      final auth = Provider.of<AuthProvider>(context, listen: false);
       final XFile? file = await _picker.pickImage(
         source: source,
         imageQuality: 85,
@@ -29,14 +30,6 @@ class _ProfileTestScreenState extends State<ProfileTestScreen> {
         if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No image selected.')));
         return;
       }
-
-      final ext = file.path.split('.').last.toLowerCase();
-      if (!['png', 'jpg', 'jpeg'].contains(ext)) {
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Only PNG/JPG images are supported.')));
-        return;
-      }
-
-      final auth = Provider.of<AuthProvider>(context, listen: false);
       auth.updateProfile(avatarPath: file.path);
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Avatar updated.')));
     } catch (e) {
@@ -94,3 +87,4 @@ class _ProfileTestScreenState extends State<ProfileTestScreen> {
     );
   }
 }
+

@@ -425,3 +425,4 @@ class _NotifItem {
   final _NotifType type;
   bool isRead;
 }
+

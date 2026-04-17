@@ -81,7 +81,7 @@ class _FertilityInsightsScreenState extends State<FertilityInsightsScreen>
         elevation: 0,
       ),
       body: isLoading
-          ? Center(child: LoadingIndicator())
+          ? const Center(child: LoadingIndicator())
           : errorMessage != null
               ? _buildErrorState()
               : _buildContent(),
@@ -169,7 +169,7 @@ class _FertilityInsightsScreenState extends State<FertilityInsightsScreen>
                   Container(
                     width: 120,
                     height: 120,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
@@ -336,7 +336,7 @@ class _FertilityInsightsScreenState extends State<FertilityInsightsScreen>
             height: 200,
             child: LineChart(
               LineChartData(
-                gridData: FlGridData(show: false),
+                gridData: const FlGridData(show: false),
                 titlesData: FlTitlesData(
                   bottomTitles: AxisTitles(
                     sideTitles: SideTitles(
@@ -374,7 +374,7 @@ class _FertilityInsightsScreenState extends State<FertilityInsightsScreen>
                       FlSpot(2, 80),
                     ],
                     isCurved: true,
-                    gradient: LinearGradient(
+                    gradient: const LinearGradient(
                       colors: [AppColors.primary, AppColors.accent],
                     ),
                     dotData: FlDotData(
@@ -541,9 +541,10 @@ class _FertilityInsightsScreenState extends State<FertilityInsightsScreen>
                 ],
               ),
             );
-          }).toList(),
+          }),
         ],
       ),
     );
   }
 }
+

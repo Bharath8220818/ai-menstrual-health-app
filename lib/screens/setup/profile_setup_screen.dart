@@ -28,7 +28,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen>
   int _cycleLength = 28;
 
   late final AnimationController _fadeCtrl;
-  late final Animation<double> _fadeAnim;
 
   @override
   void initState() {
@@ -37,7 +36,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen>
       vsync: this,
       duration: const Duration(milliseconds: 600),
     )..forward();
-    _fadeAnim = CurvedAnimation(parent: _fadeCtrl, curve: Curves.easeOut);
   }
 
   @override
@@ -743,3 +741,4 @@ class _SetupButton extends StatelessWidget {
     );
   }
 }
+

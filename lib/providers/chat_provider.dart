@@ -175,3 +175,4 @@ class ChatProvider extends ChangeNotifier {
     return fallbacks[_random.nextInt(fallbacks.length)];
   }
 }
+

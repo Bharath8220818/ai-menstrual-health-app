@@ -59,6 +59,7 @@ class _MentalHealthScreenState extends State<MentalHealthScreen>
         isLoading = false;
       });
 
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('Mental health data updated successfully!'),
@@ -66,6 +67,7 @@ class _MentalHealthScreenState extends State<MentalHealthScreen>
         ),
       );
     } catch (e) {
+      if (!mounted) return;
       setState(() => isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -123,7 +125,7 @@ class _MentalHealthScreenState extends State<MentalHealthScreen>
                   ),
                 ),
                 child: isLoading
-                    ? SizedBox(
+                    ? const SizedBox(
                         height: 24,
                         child: LoadingIndicator(),
                       )
@@ -277,7 +279,7 @@ class _MentalHealthScreenState extends State<MentalHealthScreen>
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     );
-                  }).toList(),
+                  }),
                 ],
               ),
             ),
@@ -323,9 +325,9 @@ class _MentalHealthScreenState extends State<MentalHealthScreen>
             children: [
               Column(
                 children: [
-                  Text(
+                  const Text(
                     '😴',
-                    style: const TextStyle(fontSize: 48),
+                    style: TextStyle(fontSize: 48),
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   Text(
@@ -539,3 +541,4 @@ class _MentalHealthScreenState extends State<MentalHealthScreen>
     );
   }
 }
+

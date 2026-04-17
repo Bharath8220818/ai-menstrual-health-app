@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:printing/printing.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
 
 import 'package:femi_friendly/core/constants/app_colors.dart';
 import 'package:femi_friendly/core/constants/app_spacing.dart';
@@ -19,7 +22,7 @@ class ReportScreen extends StatelessWidget {
       body: CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
-            child: _ReportHeader(),
+            child: _ReportHeader(cycle: cycle),
           ),
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(
@@ -54,6 +57,71 @@ class ReportScreen extends StatelessWidget {
 }
 
 class _ReportHeader extends StatelessWidget {
+  const _ReportHeader({required this.cycle});
+  final CycleProvider cycle;
+
+  Future<void> _exportPdf(BuildContext context) async {
+    final doc = pw.Document();
+    final date = DateTime.now();
+    doc.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.a4,
+        build: (pw.Context ctx) {
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Text('Femi-Friendly Health Report',
+                  style: pw.TextStyle(
+                      fontSize: 24, fontWeight: pw.FontWeight.bold)),
+              pw.SizedBox(height: 8),
+              pw.Text('Generated: ${date.day}/${date.month}/${date.year}',
+                  style: const pw.TextStyle(fontSize: 12)),
+              pw.Divider(),
+              pw.SizedBox(height: 12),
+              pw.Text('Cycle Summary',
+                  style: pw.TextStyle(
+                      fontSize: 16, fontWeight: pw.FontWeight.bold)),
+              pw.SizedBox(height: 8),
+              _pdfRow('Average Cycle Length', '${cycle.predictedCycleLength} days'),
+              _pdfRow('Current Day in Cycle', 'Day ${cycle.currentDayInCycle}'),
+              _pdfRow('Total Cycles Tracked', '${cycle.history.length}'),
+              _pdfRow('Cycle Status', cycle.cycleStatus),
+              _pdfRow('Irregularity Alert', cycle.irregularityAlert ? 'Yes' : 'No'),
+              pw.SizedBox(height: 16),
+              pw.Text('Disclaimer',
+                  style: pw.TextStyle(
+                      fontSize: 13, fontWeight: pw.FontWeight.bold)),
+              pw.SizedBox(height: 6),
+              pw.Text(
+                AppStrings.disclaimer,
+                style: const pw.TextStyle(fontSize: 10),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+    await Printing.sharePdf(
+      bytes: await doc.save(),
+      filename: 'femi_friendly_report_${date.year}${date.month}${date.day}.pdf',
+    );
+  }
+
+  pw.Widget _pdfRow(String label, String value) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.only(bottom: 6),
+      child: pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+        children: [
+          pw.Text(label, style: const pw.TextStyle(fontSize: 11)),
+          pw.Text(value,
+              style: pw.TextStyle(
+                  fontSize: 11, fontWeight: pw.FontWeight.bold)),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -77,17 +145,24 @@ class _ReportHeader extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.query_stats_rounded, color: Colors.white, size: 26),
-              SizedBox(width: 10),
-              Text(
+              const Icon(Icons.query_stats_rounded, color: Colors.white, size: 26),
+              const SizedBox(width: 10),
+              const Text(
                 'Health Reports',
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w800,
                   fontSize: 22,
                 ),
+              ),
+              const Spacer(),
+              IconButton(
+                icon: const Icon(Icons.picture_as_pdf_rounded,
+                    color: Colors.white),
+                tooltip: 'Export PDF',
+                onPressed: () => _exportPdf(context),
               ),
             ],
           ),
@@ -597,3 +672,4 @@ class _DisclaimerCard extends StatelessWidget {
     );
   }
 }
+

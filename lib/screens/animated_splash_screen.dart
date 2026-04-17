@@ -3,7 +3,7 @@ import 'package:lottie/lottie.dart';
 import '../routes/routes.dart';
 
 class AnimatedSplashScreen extends StatefulWidget {
-  const AnimatedSplashScreen({Key? key}) : super(key: key);
+  const AnimatedSplashScreen({super.key});
 
   @override
   State<AnimatedSplashScreen> createState() => _AnimatedSplashScreenState();
@@ -100,7 +100,7 @@ class _AnimatedSplashScreenState extends State<AnimatedSplashScreen>
                     'Your Personal Health Companion',
                     style: TextStyle(
                       fontSize: 16,
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withValues(alpha: 0.9),
                       fontWeight: FontWeight.w300,
                       letterSpacing: 0.5,
                     ),
@@ -131,7 +131,7 @@ class _AnimatedSplashScreenState extends State<AnimatedSplashScreen>
                 'Loading...',
                 style: TextStyle(
                   fontSize: 14,
-                  color: Colors.white.withOpacity(0.8),
+                  color: Colors.white.withValues(alpha: 0.8),
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -148,3 +148,4 @@ class _AnimatedSplashScreenState extends State<AnimatedSplashScreen>
     super.dispose();
   }
 }
+

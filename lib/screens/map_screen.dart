@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:femi_friendly/services/location_service.dart';
-import 'dart:math' as math;
+
 
 class NearbyPlace {
   final String name;
@@ -30,7 +30,7 @@ class NearbyPlace {
 }
 
 class MapScreen extends StatefulWidget {
-  const MapScreen({Key? key}) : super(key: key);
+  const MapScreen({super.key});
 
   @override
   State<MapScreen> createState() => _MapScreenState();
@@ -160,7 +160,7 @@ class _MapScreenState extends State<MapScreen> {
       // Load nearby places
       await _loadNearbyPlaces();
     } catch (e) {
-      print('❌ Error initializing map: $e');
+      debugPrint('❌ Error initializing map: $e');
     } finally {
       setState(() => isLoading = false);
     }
@@ -238,7 +238,7 @@ class _MapScreenState extends State<MapScreen> {
               color: Colors.blue,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.blue.withOpacity(0.5),
+                  color: Colors.blue.withValues(alpha: 0.5),
                   blurRadius: 5,
                   spreadRadius: 2,
                 )
@@ -269,7 +269,7 @@ class _MapScreenState extends State<MapScreen> {
                   color: _getMarkerColor(place.type),
                   boxShadow: [
                     BoxShadow(
-                      color: _getMarkerColor(place.type).withOpacity(0.5),
+                      color: _getMarkerColor(place.type).withValues(alpha: 0.5),
                       blurRadius: 5,
                       spreadRadius: 2,
                     )
@@ -360,7 +360,7 @@ class _MapScreenState extends State<MapScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
+                    color: Colors.blue.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -376,7 +376,7 @@ class _MapScreenState extends State<MapScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: Colors.orange.withOpacity(0.1),
+                    color: Colors.orange.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -401,7 +401,7 @@ class _MapScreenState extends State<MapScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.grey.withOpacity(0.1),
+                color: Colors.grey.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
@@ -525,7 +525,7 @@ class _MapScreenState extends State<MapScreen> {
                           label: const Text('🏥 Hospitals'),
                           selected: selectedType == 'hospitals',
                           onSelected: (_) => _filterPlaces('hospitals'),
-                          selectedColor: Colors.red.withOpacity(0.7),
+                          selectedColor: Colors.red.withValues(alpha: 0.7),
                           labelStyle: TextStyle(
                             color: selectedType == 'hospitals'
                                 ? Colors.white
@@ -538,7 +538,7 @@ class _MapScreenState extends State<MapScreen> {
                           label: const Text('💊 Pharmacies'),
                           selected: selectedType == 'pharmacies',
                           onSelected: (_) => _filterPlaces('pharmacies'),
-                          selectedColor: Colors.green.withOpacity(0.7),
+                          selectedColor: Colors.green.withValues(alpha: 0.7),
                           labelStyle: TextStyle(
                             color: selectedType == 'pharmacies'
                                 ? Colors.white
@@ -551,7 +551,7 @@ class _MapScreenState extends State<MapScreen> {
                           label: const Text('🛒 Markets'),
                           selected: selectedType == 'markets',
                           onSelected: (_) => _filterPlaces('markets'),
-                          selectedColor: Colors.orange.withOpacity(0.7),
+                          selectedColor: Colors.orange.withValues(alpha: 0.7),
                           labelStyle: TextStyle(
                             color: selectedType == 'markets'
                                 ? Colors.white
@@ -576,7 +576,7 @@ class _MapScreenState extends State<MapScreen> {
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
+                          color: Colors.black.withValues(alpha: 0.2),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -654,3 +654,4 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 }
+

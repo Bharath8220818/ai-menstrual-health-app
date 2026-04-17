@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:femi_friendly/core/constants/app_colors.dart';
 import 'package:femi_friendly/core/constants/app_spacing.dart';
 import 'package:femi_friendly/providers/auth_provider.dart';
-import 'package:femi_friendly/providers/ai_provider.dart';
+
 import 'package:femi_friendly/services/api_service.dart';
 import 'package:femi_friendly/widgets/card_widget.dart';
 import 'package:femi_friendly/widgets/loading_indicator.dart';
@@ -81,7 +81,7 @@ class _NutritionPlannerScreenState extends State<NutritionPlannerScreen>
         elevation: 0,
       ),
       body: isLoading
-          ? Center(child: LoadingIndicator())
+          ? const Center(child: LoadingIndicator())
           : errorMessage != null
               ? _buildErrorState()
               : _buildContent(),
@@ -276,7 +276,7 @@ class _NutritionPlannerScreenState extends State<NutritionPlannerScreen>
                 ],
               ),
             );
-          }).toList(),
+          }),
         ],
       ),
     );
@@ -341,7 +341,7 @@ class _NutritionPlannerScreenState extends State<NutritionPlannerScreen>
     return Chip(
       label: Text(label),
       backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-      labelStyle: TextStyle(color: AppColors.primary),
+      labelStyle: const TextStyle(color: AppColors.primary),
       side: BorderSide(color: AppColors.primary.withValues(alpha: 0.3)),
     );
   }
@@ -416,3 +416,4 @@ class _NutritionPlannerScreenState extends State<NutritionPlannerScreen>
     );
   }
 }
+

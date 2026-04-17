@@ -243,3 +243,4 @@ class CycleProvider extends ChangeNotifier {
     return trend;
   }
 }
+

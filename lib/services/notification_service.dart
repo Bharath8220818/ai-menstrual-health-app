@@ -4,8 +4,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tzdata;
 import 'dart:convert';
-import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -40,7 +40,7 @@ class NotificationService {
           requestAlertPermission: true,
         );
 
-    final InitializationSettings initSettings = InitializationSettings(
+    const InitializationSettings initSettings = InitializationSettings(
       android: androidInitSettings,
       iOS: iosInitSettings,
     );
@@ -85,6 +85,32 @@ class NotificationService {
 
     _isInitialized = true;
     debugPrint('✅ Notifications initialized successfully');
+
+    // Auto-fetch and log FCM token (used by backend for push delivery)
+    if (_firebaseEnabled) {
+      final token = await getFCMToken();
+      if (token != null) {
+        debugPrint('📱 FCM Device Token: ${token.substring(0, 20)}...');
+      }
+    }
+  }
+
+  /// Returns the FCM device registration token for this device.
+  /// Send this to the backend via POST /notifications/device-token
+  Future<String?> getFCMToken() async {
+    if (!_firebaseEnabled || _firebaseMessaging == null) return null;
+    try {
+      return await _firebaseMessaging!.getToken();
+    } catch (e) {
+      debugPrint('FCM token fetch error: $e');
+      return null;
+    }
+  }
+
+  /// Listen for FCM token refresh events and re-register with backend
+  void listenForTokenRefresh(void Function(String token) onRefresh) {
+    if (!_firebaseEnabled || _firebaseMessaging == null) return;
+    FirebaseMessaging.instance.onTokenRefresh.listen(onRefresh);
   }
 
   /// Create Android notification channels
@@ -367,17 +393,5 @@ class NotificationService {
   @pragma('vm:entry-point')
   static Future<void> _firebaseBackgroundMessageHandler(RemoteMessage message) async {
     debugPrint('🔔 Background message received: ${message.notification?.title}');
-  }
-
-  /// Get FCM token
-  Future<String?> getFCMToken() async {
-    if (kIsWeb || !_firebaseEnabled || _firebaseMessaging == null) return null;
-    return await _firebaseMessaging!.getToken();
-  }
-
-  /// Listen to FCM token refresh
-  void onFCMTokenRefresh(Function(String) callback) {
-    if (kIsWeb || !_firebaseEnabled || _firebaseMessaging == null) return;
-    _firebaseMessaging!.onTokenRefresh.listen(callback);
   }
 }

@@ -10,7 +10,7 @@ class ApiClient {
           baseUrl ??
               const String.fromEnvironment(
                 'API_BASE_URL',
-                defaultValue: 'http://127.0.0.1:8000',
+                defaultValue: 'https://femi-friendly.up.railway.app',
               ),
         ),
         _client = client ?? http.Client();

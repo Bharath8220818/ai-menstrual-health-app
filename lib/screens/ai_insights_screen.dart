@@ -80,7 +80,7 @@ class _AIInsightsScreenState extends State<AIInsightsScreen> {
       'symptoms': _selectedSymptoms.isEmpty ? ['none'] : _selectedSymptoms,
     };
 
-    print('🔄 Submitting data: $inputData');
+    debugPrint('🔄 Submitting data: $inputData');
 
     // Trigger prediction
     context.read<AIProvider>().fetchPrediction(inputData);
@@ -662,3 +662,4 @@ extension StringCapitalize on String {
     return '${this[0].toUpperCase()}${substring(1)}';
   }
 }
+

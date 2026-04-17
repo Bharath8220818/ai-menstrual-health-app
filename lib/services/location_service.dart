@@ -1,6 +1,7 @@
 // filepath: lib/services/location_service.dart
 // Location Service for handling permissions and getting current position
 
+import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -28,7 +29,7 @@ class LocationService {
       // Check if location service is enabled
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        print('📍 Location services disabled');
+        debugPrint('📍 Location services disabled');
         return const LatLng(9.9312, 76.2673); // Default: Kochi, India
       }
 
@@ -41,12 +42,12 @@ class LocationService {
 
       // Handle permission results
       if (permission == LocationPermission.deniedForever) {
-        print('📍 Location permissions permanently denied');
+        debugPrint('📍 Location permissions permanently denied');
         return const LatLng(9.9312, 76.2673); // Default: Kochi, India
       }
 
       if (permission == LocationPermission.denied) {
-        print('📍 Location permission denied');
+        debugPrint('📍 Location permission denied');
         return const LatLng(9.9312, 76.2673); // Default: Kochi, India
       }
 
@@ -57,7 +58,7 @@ class LocationService {
 
       return LatLng(position.latitude, position.longitude);
     } catch (e) {
-      print('❌ Error getting location: $e');
+      debugPrint('❌ Error getting location: $e');
       return const LatLng(9.9312, 76.2673); // Default: Kochi, India
     }
   }
@@ -84,7 +85,7 @@ class LocationService {
         desiredAccuracy: LocationAccuracy.best,
       );
     } catch (e) {
-      print('❌ Error: $e');
+      debugPrint('❌ Error: $e');
       return null;
     }
   }

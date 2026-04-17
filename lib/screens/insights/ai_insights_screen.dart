@@ -1175,3 +1175,4 @@ class _DisclaimerCard extends StatelessWidget {
     );
   }
 }
+

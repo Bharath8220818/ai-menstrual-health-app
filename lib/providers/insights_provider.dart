@@ -224,3 +224,4 @@ class InsightsProvider extends ChangeNotifier {
         .toList();
   }
 }
+
