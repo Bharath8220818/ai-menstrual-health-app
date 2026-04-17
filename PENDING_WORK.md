@@ -73,7 +73,7 @@
 **What's needed**:
 - [ ] Add to `android/local.properties`:  
   ```
-  MAPS_API_KEY=AIzaSyC-xLqRKt67WgrO0XWsDNjp21I9hp7ySdo
+  MAPS_API_KEY=YOUR_GOOGLE_MAPS_API_KEY
   ```
 - [ ] Update `android/app/build.gradle.kts` to read `MAPS_API_KEY` from local.properties
 - [ ] Enable **Maps SDK for Android** in Google Cloud Console
@@ -125,12 +125,12 @@ Startup hang fixed: 5-second timeouts on Firebase init and NotificationService i
 
 | Key | Value | Status |
 |-----|-------|--------|
-| MongoDB Atlas | `mongodb+srv://femifriendly_db_user:...@femi-friendly.j2plxfd.mongodb.net/` | ✅ In `.env` |
-| Google Cloud API | `AIzaSyC-xLqRKt67WgrO0XWsDNjp21I9hp7ySdo` | ✅ In `.env` + `local.properties` |
-| JWT Secret Key | `femi-friendly-jwt-secret-2026-...` | ✅ Configured |
-| Firebase Web API Key | `AIzaSyBuUMenn14M99Z_x-dDNC8W5H6J280SrUg` | ✅ In `.env` + `firebase_options.dart` |
-| Firebase App ID | `1:1063513374724:android:adb4d41cb1494176eeb551` | ✅ In `.env` + `firebase_options.dart` |
-| Firebase VAPID Key | `BBOMZmgvf9Js...HR18` | ✅ In `.env` |
+| MongoDB Atlas | `mongodb+srv://<USER>:<PASSWORD>@<CLUSTER>/` | ✅ In `.env` |
+| Google Cloud API | `AIzaSy... (See .env)` | ✅ In `.env` + `local.properties` |
+| JWT Secret Key | `Configured in .env` | ✅ Configured |
+| Firebase Web API Key | `AIzaSy... (See .env)` | ✅ In `.env` + `firebase_options.dart` |
+| Firebase App ID | `1:1063513374724:android:...` | ✅ In `.env` + `firebase_options.dart` |
+| Firebase VAPID Key | `BBOMZmg...` | ✅ In `.env` |
 | Firebase Admin SDK | `firebase-adminsdk.json` (service account) | ✅ Saved, tested, gitignored |
 
 ---

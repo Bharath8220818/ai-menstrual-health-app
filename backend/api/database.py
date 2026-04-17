@@ -38,7 +38,7 @@ def _get_client():
 
     mongo_uri = os.getenv(
         "MONGO_URI",
-        "mongodb+srv://femifriendly_db_user:team_project@femi-friendly.j2plxfd.mongodb.net/?appName=femi-friendly",
+        "mongodb+srv://<USER>:<PASSWORD>@<CLUSTER>/",
     )
     try:
         _client = MongoClient(mongo_uri, serverSelectionTimeoutMS=5000)

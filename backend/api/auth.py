@@ -34,7 +34,7 @@ except ImportError:
 
 try:
     from jose import jwt as _jwt
-    _JWT_SECRET = os.getenv("JWT_SECRET_KEY", "femi-friendly-secret-2026")
+    _JWT_SECRET = os.getenv("JWT_SECRET_KEY", "YOUR_SECURE_JWT_SECRET_KEY")
     _JWT_ALGO = "HS256"
     _JWT_EXPIRE_HOURS = int(os.getenv("JWT_EXPIRATION_HOURS", "24"))
     _JWT_OK = True
