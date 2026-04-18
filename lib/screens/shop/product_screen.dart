@@ -82,6 +82,7 @@ class _ProductScreenState extends State<ProductScreen>
       if (resp.statusCode == 200) {
         final json = jsonDecode(resp.body) as Map<String, dynamic>;
         final rawList = json['products'] as List? ?? [];
+        if (!mounted) return;
         setState(() {
           _category = json['category']?.toString() ?? 'Products';
           _disclaimer = json['disclaimer']?.toString() ?? '';
@@ -96,6 +97,7 @@ class _ProductScreenState extends State<ProductScreen>
         throw Exception('Server returned ${resp.statusCode}');
       }
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _error = 'Could not load recommendations.\nCheck your connection.';
         _isLoading = false;

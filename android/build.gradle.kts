@@ -1,6 +1,6 @@
 plugins {
     // Google services plugin — version declared here, applied in app/build.gradle.kts
-    id("com.google.gms.google-services") version "4.4.4" apply false
+    id("com.google.gms.google-services") version "4.4.3" apply false
 }
 
 allprojects {

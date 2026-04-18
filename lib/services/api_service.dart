@@ -6,9 +6,10 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class ApiService {
-  // Update this based on your environment
-  static const String baseUrl = 'https://femi-friendly.up.railway.app'; // Railway Production
-  // For local development: 'http://10.0.2.2:8000' (Android Emulator)
+  // 🚀 Production: Render cloud server
+  static const String baseUrl = 'https://ai-menstrual-health-app-1.onrender.com';
+  // 🧪 Local dev (Android emulator): 'http://10.0.2.2:8000'
+  // 🧪 Local dev (physical device):  'http://YOUR_PC_IP:8000'
 
   /// Make HTTP POST request to /predict endpoint
   /// 
@@ -18,7 +19,7 @@ class ApiService {
   /// - cycle_length (int)
   /// - stress (int, 1-10)
   /// - sleep (double, hours)
-  /// - symptoms (List<String>)
+  /// - symptoms (`List<String>`)
   /// - weight (double, kg)
   /// - exercise (String)
   /// 

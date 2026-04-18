@@ -51,12 +51,27 @@ class LocationService {
         return const LatLng(9.9312, 76.2673); // Default: Kochi, India
       }
 
-      // Get current position
+      // Try last-known position first (instant, no permission dialog wait)
+      final lastKnown = await Geolocator.getLastKnownPosition();
+      if (lastKnown != null &&
+          lastKnown.latitude.isFinite &&
+          lastKnown.longitude.isFinite &&
+          !(lastKnown.latitude == 0 && lastKnown.longitude == 0)) {
+        return LatLng(lastKnown.latitude, lastKnown.longitude);
+      }
+
+      // Get fresh high-accuracy position
       Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.best,
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 8),
+        ),
       );
 
-      return LatLng(position.latitude, position.longitude);
+      if (position.latitude.isFinite && position.longitude.isFinite) {
+        return LatLng(position.latitude, position.longitude);
+      }
+      return const LatLng(9.9312, 76.2673); // Default: Kochi, India
     } catch (e) {
       debugPrint('❌ Error getting location: $e');
       return const LatLng(9.9312, 76.2673); // Default: Kochi, India
@@ -82,7 +97,9 @@ class LocationService {
       }
 
       return await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.best,
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.best,
+        ),
       );
     } catch (e) {
       debugPrint('❌ Error: $e');

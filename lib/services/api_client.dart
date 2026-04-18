@@ -10,7 +10,7 @@ class ApiClient {
           baseUrl ??
               const String.fromEnvironment(
                 'API_BASE_URL',
-                defaultValue: 'https://femi-friendly.up.railway.app',
+                defaultValue: 'https://ai-menstrual-health-app.onrender.com',
               ),
         ),
         _client = client ?? http.Client();

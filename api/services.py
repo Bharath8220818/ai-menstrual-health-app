@@ -522,3 +522,140 @@ def _calculate_fertility_window(cycle_length: int, last_period_date: str) -> Opt
         return list(range(fertile_start, fertile_end + 1))
     except:
         return None
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# HEALTH CALCULATOR  (water + nutrition + BMI + pregnancy stage)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+def calculate_health(data: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    One-shot health calculator.
+
+    Water logic:  base = weight_kg × 0.033 L
+                  if pregnant: base += 0.7 L
+                  if exercise == Heavy:  base += 0.5 L
+                  if exercise == Moderate: base += 0.25 L
+
+    Nutrition AI: BMI-based calories + protein/iron/calcium targets,
+                  boosted for pregnancy.
+
+    Returns a single flat JSON consumed by the Flutter AI Insights screen.
+    """
+    try:
+        weight = float(data.get("weight_kg", 60))
+        height = data.get("height_cm")
+        pregnant = bool(data.get("pregnant", False))
+        preg_week = int(data.get("pregnancy_week") or 0)
+        exercise = str(data.get("exercise") or "Moderate").strip().lower()
+        bmi_input = data.get("bmi")
+
+        # ── BMI ──────────────────────────────────────────────────────────────
+        if bmi_input:
+            bmi = round(float(bmi_input), 1)
+        elif height:
+            h_m = float(height) / 100.0
+            bmi = round(weight / (h_m ** 2), 1)
+        else:
+            bmi = None
+
+        bmi_label = "N/A"
+        if bmi is not None:
+            if bmi < 18.5:
+                bmi_label = "Underweight"
+            elif bmi < 25:
+                bmi_label = "Normal"
+            elif bmi < 30:
+                bmi_label = "Overweight"
+            else:
+                bmi_label = "Obese"
+
+        # ── Water intake (Litres) ─────────────────────────────────────────────
+        water = weight * 0.033
+        if pregnant:
+            water += 0.7
+        if "heavy" in exercise or "intense" in exercise:
+            water += 0.5
+        elif "moderate" in exercise:
+            water += 0.25
+        water = round(water, 2)
+
+        # ── Nutrition AI ──────────────────────────────────────────────────────
+        if pregnant:
+            calories = 2200
+            protein_g = 75
+            iron_mg = 27
+            calcium_mg = 1000
+            nutrition_note = "Pregnancy nutrition — boosted for baby growth & maternal health."
+        elif bmi is not None and bmi < 18.5:
+            calories = 2000
+            protein_g = 60
+            iron_mg = 18
+            calcium_mg = 1000
+            nutrition_note = "Underweight — focus on calorie-dense, nutrient-rich foods."
+        elif bmi is not None and bmi >= 30:
+            calories = 1600
+            protein_g = 55
+            iron_mg = 18
+            calcium_mg = 1000
+            nutrition_note = "Aim for a slight caloric deficit with high protein to preserve muscle."
+        else:
+            calories = 1800
+            protein_g = 50
+            iron_mg = 18
+            calcium_mg = 1000
+            nutrition_note = "Balanced daily intake for a healthy woman."
+
+        # Adjust for exercise level
+        if "heavy" in exercise or "intense" in exercise:
+            calories += 300
+            protein_g += 15
+        elif "moderate" in exercise:
+            calories += 150
+
+        # ── Pregnancy stage ───────────────────────────────────────────────────
+        if pregnant and preg_week > 0:
+            if preg_week <= 12:
+                pregnancy_stage = "First Trimester"
+            elif preg_week <= 27:
+                pregnancy_stage = "Second Trimester"
+            else:
+                pregnancy_stage = "Third Trimester"
+            days_remaining = max(0, (40 - preg_week) * 7)
+        else:
+            pregnancy_stage = None
+            days_remaining = None
+
+        # ── Phase tips ────────────────────────────────────────────────────────
+        cycle_phase = str(data.get("cycle_phase") or "").lower()
+        if "men" in cycle_phase or "period" in cycle_phase:
+            phase_tip = "Rest, use warmth for cramps, and eat iron-rich foods like leafy greens."
+        elif "fol" in cycle_phase:
+            phase_tip = "Great time for cardio and trying new activities — energy is building!"
+        elif "ovu" in cycle_phase or "fertil" in cycle_phase:
+            phase_tip = "Peak fertility & energy — stay active and track your ovulation."
+        elif "lut" in cycle_phase:
+            phase_tip = "Wind down, prioritise sleep and magnesium-rich foods."
+        else:
+            phase_tip = "Track your symptoms daily for more personalised advice."
+
+        return {
+            "water_liters": water,
+            "water_cups": round(water / 0.25),
+            "nutrition": {
+                "calories": f"{calories} kcal",
+                "protein": f"{protein_g}g",
+                "iron": f"{iron_mg}mg",
+                "calcium": f"{calcium_mg}mg",
+                "note": nutrition_note,
+            },
+            "bmi": bmi,
+            "bmi_label": bmi_label,
+            "pregnancy_stage": pregnancy_stage,
+            "days_remaining": days_remaining,
+            "phase_tip": phase_tip,
+            "advice": phase_tip,  # alias for frontend compatibility
+        }
+    except Exception as exc:
+        raise RuntimeError(f"Health calculation error: {exc}") from exc
+

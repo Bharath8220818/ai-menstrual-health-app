@@ -197,6 +197,8 @@ class _ProfileHeader extends StatelessWidget {
           const SizedBox(height: 14),
           Text(
             auth.name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.w800,
@@ -560,6 +562,8 @@ class _StatBox extends StatelessWidget {
           Text(
             label,
             textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: const TextStyle(color: AppColors.textMuted, fontSize: 10),
           ),
         ],

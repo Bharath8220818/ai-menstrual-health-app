@@ -1,8 +1,13 @@
 """
 Notifications, Nearby Places, and Push Notification endpoints.
 - Notifications: MongoDB primary + JSON fallback
-- Nearby places: Google Places API primary + mock fallback
+- Nearby places: Overpass API (OpenStreetMap) primary + mock fallback — FREE, no key
 - Push: Firebase Admin SDK
+
+Enhancements (v2):
+  - 5-minute in-memory cache per (lat, lng, amenity)
+  - type=all fetches hospitals + pharmacies + supermarkets in one call
+  - Distance sort + limit 20 applied at endpoint level
 """
 
 from __future__ import annotations
@@ -11,10 +16,10 @@ import json
 import logging
 import math
 import os
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional
-from urllib.parse import urlencode
+from typing import Any, Dict, List, Optional, Tuple
 from urllib.request import Request, urlopen
 from uuid import uuid4
 
@@ -130,16 +135,36 @@ def _fetch_notifications(email: str, limit: int = 30) -> list:
     return _load_json(_NOTIF_FILE).get(email, [])
 
 
-# ── Google Places API ──────────────────────────────────────────────────────────
+# ── Nearby helpers ─────────────────────────────────────────────────────────────
 
 _PLACE_TYPE_MAP = {
     "hospitals": "hospital",
     "pharmacies": "pharmacy",
     "markets": "supermarket",
     "supermarkets": "supermarket",
+    "all": "all",
 }
 
 _EARTH_RADIUS_KM = 6371.0
+
+# 5-minute in-memory cache: key → (timestamp, list[NearbyPlace])
+_NEARBY_CACHE: Dict[str, Tuple[datetime, List[NearbyPlace]]] = {}
+_CACHE_TTL_SECONDS = 300
+
+
+def _cache_key(lat: float, lng: float, amenity: str) -> str:
+    return f"{amenity}@{lat:.4f},{lng:.4f}"
+
+
+def _get_cached(key: str) -> Optional[List[NearbyPlace]]:
+    entry = _NEARBY_CACHE.get(key)
+    if entry and (datetime.utcnow() - entry[0]).total_seconds() < _CACHE_TTL_SECONDS:
+        return entry[1]
+    return None
+
+
+def _set_cached(key: str, places: List[NearbyPlace]) -> None:
+    _NEARBY_CACHE[key] = (datetime.utcnow(), places)
 
 
 def _haversine_km(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
@@ -151,50 +176,68 @@ def _haversine_km(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
     return _EARTH_RADIUS_KM * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
 
-def _http_get_json(url: str, headers: dict | None = None, timeout: int = 8) -> Any:
+def _overpass_nearby(lat: float, lng: float, amenity: str, radius_m: int) -> List[NearbyPlace]:
+    """
+    Query OpenStreetMap Overpass API for nearby amenities.
+    Completely FREE — no API key required.
+    Uses 5-minute in-memory cache to avoid redundant requests.
+    """
+    key = _cache_key(lat, lng, amenity)
+    cached = _get_cached(key)
+    if cached is not None:
+        return cached
+
+    overpass_url = os.getenv("OVERPASS_URL", "https://overpass-api.de/api/interpreter")
+    query = f"""
+    [out:json][timeout:12];
+    node(around:{radius_m},{lat},{lng})["amenity"="{amenity}"];
+    out body 20;
+    """
     try:
-        req = Request(url, headers=headers or {})
-        with urlopen(req, timeout=timeout) as resp:
-            return json.loads(resp.read().decode("utf-8", errors="ignore"))
+        import urllib.request
+        data = query.encode("utf-8")
+        req = urllib.request.Request(
+            overpass_url,
+            data=data,
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+            method="POST",
+        )
+        with urllib.request.urlopen(req, timeout=12) as resp:
+            result = json.loads(resp.read().decode("utf-8", errors="ignore"))
     except Exception as exc:
-        logger.warning(f"HTTP request failed: {exc}")
-        return {}
-
-
-def _google_nearby(lat: float, lng: float, place_type: str, radius_m: int) -> list[NearbyPlace]:
-    api_key = os.getenv("GOOGLE_MAPS_API_KEY", "").strip()
-    if not api_key:
+        logger.warning(f"Overpass API failed for {amenity}: {exc}")
         return []
 
-    params = {
-        "location": f"{lat},{lng}",
-        "radius": radius_m,
-        "type": place_type,
-        "key": api_key,
-    }
-    url = f"https://maps.googleapis.com/maps/api/place/nearbysearch/json?{urlencode(params)}"
-    data = _http_get_json(url)
-
-    results = data.get("results", [])
-    places: list[NearbyPlace] = []
-    for item in results[:8]:
-        loc = item.get("geometry", {}).get("location", {})
-        item_lat = loc.get("lat", lat)
-        item_lng = loc.get("lng", lng)
-        dist_km = _haversine_km(lat, lng, item_lat, item_lng)
-        rating = str(item.get("rating", "N/A"))
+    elements = result.get("elements", [])
+    places: List[NearbyPlace] = []
+    for el in elements:
+        el_lat = el.get("lat", lat)
+        el_lng = el.get("lon", lng)
+        tags = el.get("tags", {})
+        name = tags.get("name") or tags.get("name:en") or amenity.title()
+        address = ", ".join(filter(None, [
+            tags.get("addr:street", ""),
+            tags.get("addr:city", ""),
+        ])) or "Nearby"
+        phone = tags.get("phone", tags.get("contact:phone", ""))
+        dist = _haversine_km(lat, lng, el_lat, el_lng)
         places.append(
             NearbyPlace(
-                name=item.get("name", "Unknown"),
-                address=item.get("vicinity", ""),
-                latitude=item_lat,
-                longitude=item_lng,
-                distance=f"{dist_km:.1f} km",
-                rating=rating,
-                phone="",
-                place_type=place_type,
+                name=name,
+                address=address,
+                latitude=el_lat,
+                longitude=el_lng,
+                distance=f"{dist:.1f} km",
+                rating="N/A",
+                phone=phone,
+                place_type=amenity,
             )
         )
+
+    # Sort by distance, limit 20
+    places.sort(key=lambda p: float(p.distance.replace(" km", "")))
+    places = places[:20]
+    _set_cached(key, places)
     return places
 
 
@@ -292,18 +335,56 @@ async def schedule_notifications(
 async def get_nearby_places(
     lat: float = Query(..., description="Latitude"),
     lng: float = Query(..., description="Longitude"),
-    type: str = Query("hospitals", description="hospitals | pharmacies | markets"),
-    radius: int = Query(5, description="Search radius in km"),
+    type: str = Query("hospitals", description="hospitals | pharmacies | markets | all"),
+    radius: int = Query(3, description="Search radius in km"),
 ) -> NearbyResponse:
-    """Return nearby medical facilities using Google Places API (mock fallback)."""
-    google_type = _PLACE_TYPE_MAP.get(type, "hospital")
+    """
+    Return nearby medical facilities using Overpass API (OpenStreetMap, FREE).
+    - type=all  →  hospitals + pharmacies + markets combined
+    - Results sorted by distance, limited to 20
+    - 5-minute in-memory cache per location+type
+    """
+    amenity_map = {
+        "hospitals": "hospital",
+        "pharmacies": "pharmacy",
+        "markets": "supermarket",
+        "supermarkets": "supermarket",
+        "hospital": "hospital",
+        "pharmacy": "pharmacy",
+    }
     radius_m = radius * 1000
+    source = "overpass_openstreetmap"
 
-    places = _google_nearby(lat, lng, google_type, radius_m)
-    source = "google_places"
+    if type.lower() == "all":
+        # Parallel fetch all three amenity types
+        amenities = ["hospital", "pharmacy", "supermarket"]
+        combined: List[NearbyPlace] = []
+        with ThreadPoolExecutor(max_workers=3) as pool:
+            futures = {
+                pool.submit(_overpass_nearby, lat, lng, a, radius_m): a
+                for a in amenities
+            }
+            for future in as_completed(futures):
+                try:
+                    combined.extend(future.result())
+                except Exception as exc:
+                    logger.warning(f"Parallel fetch error: {exc}")
+
+        if not combined:
+            for a in amenities:
+                combined.extend(_mock_places(lat, lng, a))
+            source = "mock"
+
+        # Sort + limit
+        combined.sort(key=lambda p: float(p.distance.replace(" km", "")))
+        return NearbyResponse(data=combined[:20], status="success", source=source)
+
+    # Single type
+    amenity = amenity_map.get(type.lower(), "hospital")
+    places = _overpass_nearby(lat, lng, amenity, radius_m)
 
     if not places:
-        places = _mock_places(lat, lng, google_type)
+        places = _mock_places(lat, lng, amenity)
         source = "mock"
 
     return NearbyResponse(data=places, status="success", source=source)

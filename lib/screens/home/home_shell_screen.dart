@@ -95,7 +95,7 @@ class _HomeShellScreenState extends State<HomeShellScreen>
         (
           icon: Icons.favorite_border_rounded,
           activeIcon: Icons.favorite_rounded,
-          label: 'Pregnancy',
+          label: 'Preg',
           emoji: 'PG',
         ),
         (
@@ -212,12 +212,14 @@ class _BottomNavBar extends StatelessWidget {
               final i = entry.key;
               final tab = entry.value;
               final isActive = currentIndex == i;
-              return _NavItem(
-                icon: isActive ? tab.activeIcon : tab.icon,
-                label: tab.label,
-                emoji: tab.emoji,
-                isActive: isActive,
-                onTap: () => onTap(i),
+              return Expanded(
+                child: _NavItem(
+                  icon: isActive ? tab.activeIcon : tab.icon,
+                  label: tab.label,
+                  emoji: tab.emoji,
+                  isActive: isActive,
+                  onTap: () => onTap(i),
+                ),
               );
             }).toList(),
           ),
@@ -290,7 +292,7 @@ class _NavItemState extends State<_NavItem>
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 250),
           curve: Curves.easeOutCubic,
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
           decoration: BoxDecoration(
             color: widget.isActive
                 ? AppColors.primary.withValues(alpha: 0.1)
@@ -308,17 +310,19 @@ class _NavItemState extends State<_NavItem>
                   color: widget.isActive
                       ? AppColors.primary
                       : AppColors.textMuted,
-                  size: 22,
+                  size: 20,
                 ),
               ),
-              const SizedBox(height: 3),
+              const SizedBox(height: 2),
               Text(
                 widget.label,
+                maxLines: 1,
+                overflow: TextOverflow.visible,
                 style: TextStyle(
                   color: widget.isActive
                       ? AppColors.primary
                       : AppColors.textMuted,
-                  fontSize: 10,
+                  fontSize: 9,
                   fontWeight: widget.isActive
                       ? FontWeight.w700
                       : FontWeight.w500,

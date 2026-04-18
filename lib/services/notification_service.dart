@@ -46,9 +46,33 @@ class NotificationService {
     );
 
     await _localNotifications.initialize(
-      initSettings,
+      settings: initSettings,
       onDidReceiveNotificationResponse: _handleNotificationTap,
+      onDidReceiveBackgroundNotificationResponse: _handleNotificationTapStatic,
     );
+
+    // Handle notification if the app was opened via a notification
+    final NotificationResponse? launchResponse =
+        await _localNotifications.getNotificationAppLaunchDetails().then(
+      (details) => details?.notificationResponse,
+    );
+    if (launchResponse != null) {
+      _handleNotificationTap(launchResponse);
+    }
+
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      final androidPlugin = _localNotifications
+          .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>();
+      // Try both possible method names depending on version
+      try {
+        await (androidPlugin as dynamic).requestNotificationsPermission();
+      } catch (_) {
+        try {
+          await (androidPlugin as dynamic).requestPermission();
+        } catch (_) {}
+      }
+    }
 
     // Create notification channels for Android
     await _createNotificationChannels();
@@ -64,6 +88,7 @@ class NotificationService {
       _firebaseEnabled = true;
 
       // Request Firebase permissions
+    if (_firebaseMessaging != null) {
       await _firebaseMessaging!.requestPermission(
         alert: true,
         announcement: false,
@@ -73,6 +98,7 @@ class NotificationService {
         provisional: false,
         sound: true,
       );
+    }
 
       // Handle background messages
       FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundMessageHandler);
@@ -196,10 +222,10 @@ class NotificationService {
     final payloadJson = payload == null ? null : jsonEncode(payload);
 
     await _localNotifications.show(
-      DateTime.now().millisecond,
-      title,
-      body,
-      details,
+      id: DateTime.now().millisecond,
+      title: title,
+      body: body,
+      notificationDetails: details,
       payload: payloadJson,
     );
 
@@ -234,20 +260,18 @@ class NotificationService {
         presentSound: true,
       );
 
-      await _localNotifications.zonedSchedule(
-        i,
-        '💧 Time to Drink Water',
-        'Stay hydrated! Drink a glass of water now.',
-        scheduledDate,
-        const NotificationDetails(
-          android: androidDetails,
-          iOS: iosDetails,
-        ),
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
-        matchDateTimeComponents: DateTimeComponents.time, // Repeat daily
-      );
+    await _localNotifications.zonedSchedule(
+      id: i,
+      title: '💧 Time to Drink Water',
+      body: 'Stay hydrated! Drink a glass of water now.',
+      scheduledDate: scheduledDate,
+      notificationDetails: const NotificationDetails(
+        android: androidDetails,
+        iOS: iosDetails,
+      ),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      matchDateTimeComponents: DateTimeComponents.time, // Repeat daily
+    );
 
       debugPrint('📅 Water reminder scheduled for ${times[i]}');
     }
@@ -272,17 +296,15 @@ class NotificationService {
     );
 
     await _localNotifications.zonedSchedule(
-      100,
-      '🩸 Period Coming',
-      'Your period is expected tomorrow. Are you prepared?',
-      scheduledDate,
-      const NotificationDetails(
+      id: 100,
+      title: '🩸 Period Coming',
+      body: 'Your period is expected tomorrow. Are you prepared?',
+      scheduledDate: scheduledDate,
+      notificationDetails: const NotificationDetails(
         android: androidDetails,
         iOS: iosDetails,
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
     );
 
     debugPrint('📅 Cycle alert scheduled for $cycleDate');
@@ -312,17 +334,15 @@ class NotificationService {
       );
 
       await _localNotifications.zonedSchedule(
-        200 + i,
-        '🌸 High Fertility Window',
-        'Today is a fertile day. Track your cycle for accurate predictions.',
-        scheduledDate,
-        const NotificationDetails(
+        id: 200 + i,
+        title: '🌸 High Fertility Window',
+        body: 'Today is a fertile day. Track your cycle for accurate predictions.',
+        scheduledDate: scheduledDate,
+        notificationDetails: const NotificationDetails(
           android: androidDetails,
           iOS: iosDetails,
         ),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
       );
 
       debugPrint('📅 Fertility alert scheduled for day ${fertileDays[i]}');
@@ -346,17 +366,15 @@ class NotificationService {
     );
 
     await _localNotifications.zonedSchedule(
-      300 + weekNumber,
-      '👶 Week $weekNumber: Baby Development Update',
-      'Tap to see what\'s happening with your baby this week.',
-      scheduledDate,
-      const NotificationDetails(
+      id: 300 + weekNumber,
+      title: '👶 Week $weekNumber: Baby Development Update',
+      body: 'Tap to see what\'s happening with your baby this week.',
+      scheduledDate: scheduledDate,
+      notificationDetails: const NotificationDetails(
         android: androidDetails,
         iOS: iosDetails,
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
     );
 
     debugPrint('📅 Pregnancy update scheduled for week $weekNumber');
@@ -390,6 +408,11 @@ class NotificationService {
   }
 
   /// Static method to handle background messages
+  @pragma('vm:entry-point')
+  static void _handleNotificationTapStatic(NotificationResponse response) {
+    debugPrint('🎯 Static notification tapped: ${response.payload}');
+  }
+
   @pragma('vm:entry-point')
   static Future<void> _firebaseBackgroundMessageHandler(RemoteMessage message) async {
     debugPrint('🔔 Background message received: ${message.notification?.title}');

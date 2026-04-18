@@ -12,10 +12,23 @@ import 'package:femi_friendly/routes/routes.dart';
 import 'package:femi_friendly/screens/phase/phase_detail_screen.dart';
 import 'package:femi_friendly/widgets/card_widget.dart';
 
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key, this.onQuickActionTap});
 
   final void Function(int index)? onQuickActionTap;
+
+  @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  // Water tracker state managed locally on dashboard
+  int _waterCups = 0;
+  static const int _waterGoal = 8;
+  static const int _cupMl = 250;
+  void _addWater() {
+    if (_waterCups < _waterGoal) setState(() => _waterCups++);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,15 +67,33 @@ class DashboardScreen extends StatelessWidget {
             ),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
+                // Happy daily note based on cycle phase
+                _HappyDailyNote(cycle: cycle),
+                const SizedBox(height: AppSpacing.md),
                 // Pregnancy Mode Banner (shown when active)
                 if (preg.pregnancyMode)
                   _PregnancyBanner(
                     preg: preg,
-                    onTap: () => onQuickActionTap?.call(2),
+                    onTap: () => widget.onQuickActionTap?.call(2),
                   ),
                 if (preg.pregnancyMode) const SizedBox(height: AppSpacing.md),
                 // Main cycle card
                 _CycleCard(cycle: cycle),
+                const SizedBox(height: AppSpacing.md),
+                // Smart Alerts
+                _SmartAlertsCard(cycle: cycle),
+                const SizedBox(height: AppSpacing.md),
+                // Quick Stats row
+                const _QuickStatsRow(),
+                const SizedBox(height: AppSpacing.md),
+                // Inline Water Tracker
+                _WaterTrackerCard(
+                  cups: _waterCups,
+                  goal: _waterGoal,
+                  cupMl: _cupMl,
+                  onAdd: _addWater,
+                  onNavigate: () => Navigator.pushNamed(context, AppRoutes.waterTracker),
+                ),
                 const SizedBox(height: AppSpacing.md),
                 // 4 Phase cards row
                 _PhaseSelectorRow(cycle: cycle),
@@ -70,10 +101,10 @@ class DashboardScreen extends StatelessWidget {
                 // Daily recommendation section
                 _DailyRecommendations(cycle: cycle),
                 const SizedBox(height: AppSpacing.md),
-                _PcodFocusCard(cycle: cycle, onTap: () => onQuickActionTap?.call(3)),
+                _PcodFocusCard(cycle: cycle, onTap: () => widget.onQuickActionTap?.call(3)),
                 const SizedBox(height: AppSpacing.md),
                 // Quick actions (5 actions)
-                _QuickActionsGrid(onTap: onQuickActionTap),
+                _QuickActionsGrid(onTap: widget.onQuickActionTap),
                 const SizedBox(height: AppSpacing.md),
                 // Phase info
                 _PhaseInfoCard(cycle: cycle),
@@ -792,14 +823,14 @@ class _QuickActionsGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     final actions = [
       (
-        label: 'Log Symptoms',
+        label: 'Log',
         icon: Icons.add_circle_outline_rounded,
         emoji: '🩸',
         gradient: const LinearGradient(colors: [Color(0xFFE91E63), Color(0xFFFF4081)]),
         onPressed: () => onTap?.call(1),
       ),
       (
-        label: 'Water Track',
+        label: 'Water',
         icon: Icons.water_drop_rounded,
         emoji: '💧',
         gradient: const LinearGradient(colors: [Color(0xFF1565C0), Color(0xFF42A5F5)]),
@@ -843,7 +874,7 @@ class _QuickActionsGrid extends StatelessWidget {
           crossAxisCount: 5,
           crossAxisSpacing: 8,
           mainAxisSpacing: 8,
-          childAspectRatio: 0.75,
+          childAspectRatio: 0.6,
           children: actions.map((a) {
             return GestureDetector(
               onTap: a.onPressed,
@@ -869,7 +900,13 @@ class _QuickActionsGrid extends StatelessWidget {
                     Text(
                       a.label,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 9),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 9,
+                      ),
                     ),
                   ],
                 ),
@@ -1001,6 +1038,485 @@ class _DisclaimerCard extends StatelessWidget {
               AppStrings.disclaimer,
               style: TextStyle(color: AppColors.warning, fontSize: 12, height: 1.5),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Happy Daily Note ────────────────────────────────────────────────────────
+class _HappyDailyNote extends StatelessWidget {
+  const _HappyDailyNote({required this.cycle});
+  final CycleProvider cycle;
+
+  @override
+  Widget build(BuildContext context) {
+    final day = cycle.currentDayInCycle;
+    final String emoji;
+    final String note;
+    final List<Color> gradientColors;
+
+    if (day <= 5) {
+      emoji = '🌙';
+      note = 'Rest is productive. Your body is doing incredible work during menstruation — be gentle with yourself today.';
+      gradientColors = const [Color(0xFFC2185B), Color(0xFFE91E63)];
+    } else if (day <= 13) {
+      emoji = '🌱';
+      note = 'Your energy is blooming! The follicular phase brings clarity, creativity, and motivation — make the most of it!';
+      gradientColors = const [Color(0xFFF57F17), Color(0xFFFFB300)];
+    } else if (day <= 16) {
+      emoji = '✨';
+      note = 'You are at your most radiant! Ovulation brings peak energy, confidence, and social magnetism. Shine!';
+      gradientColors = const [Color(0xFF6A1B9A), Color(0xFFAB47BC)];
+    } else {
+      emoji = '🌸';
+      note = 'Wind down, prioritize rest, and nurture yourself. The luteal phase is perfect for reflection and self-care.';
+      gradientColors = const [Color(0xFF1565C0), Color(0xFF42A5F5)];
+    }
+
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeOutCubic,
+      builder: (context, val, child) => Opacity(
+        opacity: val,
+        child: Transform.translate(
+          offset: Offset(0, (1 - val) * 10),
+          child: child,
+        ),
+      ),
+      child: Container(
+        margin: const EdgeInsets.only(top: AppSpacing.md),
+        padding: const EdgeInsets.all(AppSpacing.md),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: gradientColors,
+          ),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+          boxShadow: [
+            BoxShadow(
+              color: gradientColors.first.withValues(alpha: 0.28),
+              blurRadius: 18,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                shape: BoxShape.circle,
+              ),
+              child: Text(emoji, style: const TextStyle(fontSize: 22)),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Today\'s Affirmation ✨',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.8),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    note,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      height: 1.5,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Smart Alerts Card ───────────────────────────────────────────────────────
+class _SmartAlertsCard extends StatelessWidget {
+  const _SmartAlertsCard({required this.cycle});
+  final CycleProvider cycle;
+
+  @override
+  Widget build(BuildContext context) {
+    final daysUntilPeriod =
+        cycle.nextPeriodDate.difference(DateTime.now()).inDays;
+    final now = TimeOfDay.now();
+    final isHydrationTime = now.hour >= 8 && now.hour < 20;
+
+    final alerts = <({String emoji, String message, Color color})>[];
+
+    if (daysUntilPeriod <= 3 && daysUntilPeriod >= 0) {
+      alerts.add((
+        emoji: '⚠️',
+        message: daysUntilPeriod == 0
+            ? 'Period expected today — stay prepared!'
+            : 'Period expected in $daysUntilPeriod day${daysUntilPeriod == 1 ? '' : 's'} — be ready!',
+        color: AppColors.primary,
+      ));
+    }
+    if (daysUntilPeriod < 0) {
+      alerts.add((
+        emoji: '📌',
+        message: 'Period is ${(-daysUntilPeriod)} day(s) late — consider logging a new cycle.',
+        color: AppColors.warning,
+      ));
+    }
+    if (isHydrationTime) {
+      alerts.add((
+        emoji: '💧',
+        message: 'Stay hydrated! Aim for 8 cups of water today.',
+        color: const Color(0xFF1565C0),
+      ));
+    }
+    if (cycle.currentDayInCycle >= 12 && cycle.currentDayInCycle <= 16) {
+      alerts.add((
+        emoji: '🌸',
+        message: 'Fertile window — ovulation is approaching or happening!',
+        color: const Color(0xFF9C27B0),
+      ));
+    }
+
+    if (alerts.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Smart Alerts',
+          style: TextStyle(
+              fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textDark),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        ...alerts.map(
+          (a) => Container(
+            margin: const EdgeInsets.only(bottom: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: a.color.withValues(alpha: 0.07),
+              borderRadius: BorderRadius.circular(AppSpacing.radius),
+              border: Border.all(color: a.color.withValues(alpha: 0.25)),
+            ),
+            child: Row(
+              children: [
+                Text(a.emoji, style: const TextStyle(fontSize: 18)),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    a.message,
+                    style: TextStyle(
+                      color: a.color,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ─── Quick Stats Row ─────────────────────────────────────────────────────────
+class _QuickStatsRow extends StatelessWidget {
+  const _QuickStatsRow();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Today\'s Activity',
+          style: TextStyle(
+              fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textDark),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Row(
+          children: [
+            Expanded(
+              child: _StatCard(
+                emoji: '👣',
+                label: 'Steps',
+                value: '—',
+                unit: 'steps',
+                color: const Color(0xFF4CAF50),
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: _StatCard(
+                emoji: '🔥',
+                label: 'Calories',
+                value: '—',
+                unit: 'kcal',
+                color: const Color(0xFFFF5722),
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: _StatCard(
+                emoji: '😴',
+                label: 'Sleep',
+                value: '—',
+                unit: 'hrs',
+                color: const Color(0xFF9C27B0),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _StatCard extends StatelessWidget {
+  const _StatCard({
+    required this.emoji,
+    required this.label,
+    required this.value,
+    required this.unit,
+    required this.color,
+  });
+
+  final String emoji;
+  final String label;
+  final String value;
+  final String unit;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AppSpacing.radius),
+        boxShadow: [
+          BoxShadow(
+            color: color.withValues(alpha: 0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 20)),
+          const SizedBox(height: 6),
+          Text(
+            value,
+            style: TextStyle(
+              color: color,
+              fontSize: 20,
+              fontWeight: FontWeight.w900,
+              height: 1.1,
+            ),
+          ),
+          Text(
+            unit,
+            style: const TextStyle(
+              color: AppColors.textMuted,
+              fontSize: 10,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: const TextStyle(
+              color: AppColors.textMuted,
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Inline Water Tracker Card ───────────────────────────────────────────────
+class _WaterTrackerCard extends StatelessWidget {
+  const _WaterTrackerCard({
+    required this.cups,
+    required this.goal,
+    required this.cupMl,
+    required this.onAdd,
+    required this.onNavigate,
+  });
+
+  final int cups;
+  final int goal;
+  final int cupMl;
+  final VoidCallback onAdd;
+  final VoidCallback onNavigate;
+
+  @override
+  Widget build(BuildContext context) {
+    final progress = goal == 0 ? 0.0 : cups / goal;
+    final totalMl = cups * cupMl;
+    final goalMl = goal * cupMl;
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF0D47A1), Color(0xFF42A5F5)],
+        ),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF1565C0).withValues(alpha: 0.28),
+            blurRadius: 18,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          // Circular progress
+          SizedBox(
+            width: 80,
+            height: 80,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                TweenAnimationBuilder<double>(
+                  tween: Tween<double>(begin: 0, end: progress),
+                  duration: const Duration(milliseconds: 900),
+                  curve: Curves.easeOutCubic,
+                  builder: (context, v, _) => CircularProgressIndicator(
+                    value: v,
+                    strokeWidth: 8,
+                    backgroundColor: Colors.white.withValues(alpha: 0.2),
+                    valueColor: const AlwaysStoppedAnimation<Color>(
+                      Color(0xFF69F0AE),
+                    ),
+                    strokeCap: StrokeCap.round,
+                  ),
+                ),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('💧', style: TextStyle(fontSize: 18)),
+                    Text(
+                      '$cups/$goal',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w900,
+                        height: 1.1,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 16),
+          // Labels
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Water Tracker 💧',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${totalMl}ml of ${goalMl}ml',
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.85),
+                    fontSize: 13,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  progress >= 1.0
+                      ? '🎉 Goal reached!'
+                      : '${goal - cups} cups remaining',
+                  style: TextStyle(
+                    color: progress >= 1.0
+                        ? const Color(0xFF69F0AE)
+                        : Colors.white.withValues(alpha: 0.7),
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          // Buttons
+          Column(
+            children: [
+              GestureDetector(
+                onTap: onAdd,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.12),
+                        blurRadius: 8,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: const Text(
+                    '+ Add',
+                    style: TextStyle(
+                      color: Color(0xFF1565C0),
+                      fontWeight: FontWeight.w800,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              GestureDetector(
+                onTap: onNavigate,
+                child: Text(
+                  'View all',
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.75),
+                    fontSize: 11,
+                    decoration: TextDecoration.underline,
+                    decorationColor: Colors.white.withValues(alpha: 0.5),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),

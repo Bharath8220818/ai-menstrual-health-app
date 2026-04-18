@@ -30,12 +30,25 @@ class BasePredict(BaseModel):
     motility: Optional[float] = None
     trying_months: Optional[int] = None
     treatment_type: Optional[str] = None
-    # Additional wellness fields for recommendations
+    # Wellness / recommendation fields
     sleep_hours: Optional[float] = None
     weight_kg: Optional[float] = None
     exercise_minutes_per_day: Optional[float] = None
     symptoms: Optional[List[str]] = []
     cycle_day: Optional[int] = None
+    # Frontend AI payload format (user-friendly names)
+    period_length: Optional[float] = None        # alias for menses_length
+    pregnant: Optional[bool] = False             # pregnancy active flag
+    exercise: Optional[str] = None              # e.g. "Moderate", "Light", "Heavy"
+    height_cm: Optional[float] = None
+    last_period_date: Optional[str] = None
+    cycle_phase: Optional[str] = None
+    pregnancy_week: Optional[int] = None
+    mood: Optional[int] = None
+    activity_level: Optional[str] = None
+    mood_score: Optional[float] = None
+    # Cycle history array for intelligence engine
+    cycle_history: Optional[List[float]] = None
 
 
 class RecommendInput(BasePredict):
@@ -88,3 +101,16 @@ class IrregularResponse(BaseModel):
 class PregnancyResponse(BaseModel):
     likelihood: str
     probability: Optional[float]
+
+
+class CalculateHealthInput(BaseModel):
+    """Input for the /calculate-health endpoint."""
+    age: Optional[float] = None
+    weight_kg: float = Field(..., description="Body weight in kg")
+    height_cm: Optional[float] = None
+    pregnant: bool = Field(default=False)
+    pregnancy_week: Optional[int] = 0
+    exercise: Optional[str] = "Moderate"
+    bmi: Optional[float] = None
+    cycle_phase: Optional[str] = None
+    symptoms: Optional[List[str]] = []
